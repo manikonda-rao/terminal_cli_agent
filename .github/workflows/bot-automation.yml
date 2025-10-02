@@ -1,0 +1,473 @@
+name: Bot Automation
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled, closed]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited, synchronize, reopened, closed, ready_for_review]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  schedule:
+    # Run maintenance tasks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  issue-automation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' || github.event_name == 'issue_comment'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Issue Automation
+      uses: actions/github-script@v7
+      with:
+        script: |
+          if (github.event_name === 'issues' && github.event.action === 'opened') {
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            const title = issue.title.toLowerCase();
+            const labels = [];
+            
+            // Auto-label issues based on content
+            if (title.includes('bug') || title.includes('error') || title.includes('crash') || 
+                title.includes('broken') || title.includes('fails') || title.includes('issue') ||
+                body.includes('error') || body.includes('exception') || body.includes('traceback')) {
+              labels.push('bug');
+            }
+            
+            if (title.includes('feature') || title.includes('enhancement') || title.includes('add') ||
+                title.includes('implement') || title.includes('support') || title.includes('new')) {
+              labels.push('enhancement');
+            }
+            
+            if (title.includes('doc') || title.includes('documentation') || title.includes('readme') ||
+                title.includes('guide') || title.includes('tutorial') || title.includes('example')) {
+              labels.push('documentation');
+            }
+            
+            if (title.includes('performance') || title.includes('slow') || title.includes('optimize') ||
+                title.includes('speed') || title.includes('memory') || title.includes('cpu')) {
+              labels.push('performance');
+            }
+            
+            if (title.includes('security') || title.includes('vulnerability') || title.includes('exploit') ||
+                title.includes('attack') || title.includes('safe') || title.includes('secure')) {
+              labels.push('security');
+            }
+            
+            if (title.includes('good first issue') || title.includes('beginner') || title.includes('easy') ||
+                title.includes('starter') || title.includes('newcomer') || title.includes('first time')) {
+              labels.push('good first issue');
+            }
+            
+            // Add default labels
+            labels.push('needs-triage');
+            
+            // Apply labels
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }
+            
+            // Welcome newcomers for good first issues
+            if (labels.includes('good first issue')) {
+              const comment = `## Welcome! 
+              
+              Thank you for your interest in contributing to Terminal Coding Agent! This issue has been labeled as a good first issue, making it perfect for newcomers.
+              
+              ### Getting Started
+              1. **Read the documentation**: Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines
+              2. **Set up your environment**: Follow the development setup instructions
+              3. **Ask questions**: Don't hesitate to ask questions in the comments
+              4. **Take your time**: There's no rush - take the time you need to understand the codebase
+              
+              ### Resources
+              - [Contributing Guide](CONTRIBUTING.md)
+              - [Code of Conduct](CODE_OF_CONDUCT.md)
+              - [Security Policy](SECURITY.md)
+              - [Project Roadmap](ROADMAP.md)
+              
+              ### Need Help?
+              - Join our community discussions
+              - Check existing issues and pull requests
+              - Review the codebase to understand the architecture
+              
+              We're here to help you succeed! 🚀`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+            }
+            
+            // Check if issue follows template
+            const hasTemplate = body.includes('## Bug Description') || 
+                               body.includes('## Feature Description') || 
+                               body.includes('## Issue Description');
+            
+            if (!hasTemplate && body.length < 100) {
+              const comment = `## Issue Template Reminder 📝
+              
+              It looks like this issue might not be following our issue templates. For better organization and faster resolution, please consider using our issue templates:
+              
+              - [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.md)
+              - [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.md)
+              - [Good First Issue Template](.github/ISSUE_TEMPLATE/good_first_issue.md)
+              
+              ### What to include:
+              - Clear description of the issue or feature
+              - Steps to reproduce (for bugs)
+              - Expected vs actual behavior
+              - Environment details
+              - Additional context
+              
+              This helps maintainers understand and prioritize your issue more effectively! 🎯`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+            }
+          }
+
+  pr-automation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: PR Automation
+      uses: actions/github-script@v7
+      with:
+        script: |
+          if (github.event_name === 'pull_request' && github.event.action === 'opened') {
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const title = pr.title;
+            const body = pr.body || '';
+            const labels = [];
+            
+            // Check PR title format
+            const titlePattern = /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+/;
+            if (!titlePattern.test(title)) {
+              labels.push('needs-title-update');
+            }
+            
+            // Check PR description
+            if (body.length < 50) {
+              labels.push('needs-description');
+            }
+            
+            // Check for breaking changes
+            if (body.includes('BREAKING CHANGE') || body.includes('breaking change')) {
+              labels.push('breaking-change');
+            }
+            
+            // Check for tests
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+            
+            const hasTests = files.data.some(file => 
+              file.filename.includes('test_') || 
+              file.filename.includes('_test.py') ||
+              file.filename.includes('tests/')
+            );
+            
+            if (!hasTests && !title.includes('docs') && !title.includes('chore')) {
+              labels.push('needs-tests');
+            }
+            
+            // Check for documentation updates
+            const hasDocs = files.data.some(file => 
+              file.filename.includes('README') ||
+              file.filename.includes('CONTRIBUTING') ||
+              file.filename.includes('docs/') ||
+              file.filename.endsWith('.md')
+            );
+            
+            if (!hasDocs && (title.includes('feat') || title.includes('fix'))) {
+              labels.push('needs-docs');
+            }
+            
+            // Add default labels
+            labels.push('needs-review');
+            
+            // Apply labels
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: labels
+              });
+            }
+            
+            // Check if author is a first-time contributor
+            const { data: contributions } = await github.rest.repos.listContributors({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const isFirstTime = !contributions.some(contributor => contributor.login === author);
+            
+            let comment = `## Thank you for your contribution! 🎉
+            
+            @${author}, thank you for submitting this pull request. We appreciate your effort to improve Terminal Coding Agent!`;
+            
+            if (isFirstTime) {
+              comment += `
+              
+              ### Welcome to the project! 👋
+              This appears to be your first contribution to Terminal Coding Agent. We're excited to have you on board!
+              
+              ### What happens next?
+              1. **Automated checks**: Our CI/CD pipeline will run tests and validations
+              2. **Code review**: Maintainers will review your changes
+              3. **Feedback**: We'll provide constructive feedback to help improve your contribution
+              4. **Merge**: Once approved, your changes will be merged into the main branch
+              
+              ### Resources
+              - [Contributing Guide](CONTRIBUTING.md)
+              - [Code of Conduct](CODE_OF_CONDUCT.md)
+              - [Pull Request Template](.github/pull_request_template.md)`;
+            }
+            
+            comment += `
+            
+            ### Review Checklist
+            - [ ] Code follows project style guidelines
+            - [ ] Tests pass and coverage is maintained
+            - [ ] Documentation is updated if needed
+            - [ ] No breaking changes (or properly documented)
+            - [ ] Security considerations addressed
+            
+            ### Need Help?
+            - Check the [Contributing Guide](CONTRIBUTING.md)
+            - Ask questions in the PR comments
+            - Join our community discussions
+            
+            We'll review your PR as soon as possible! 🚀`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: comment
+            });
+            
+            // Check PR size
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const changedFiles = pr.changed_files;
+            
+            let sizeComment = '';
+            let sizeLabels = [];
+            
+            if (additions > 1000 || deletions > 1000 || changedFiles > 20) {
+              sizeLabels.push('large-pr');
+              sizeComment = `## Large Pull Request Detected 📏
+              
+              This PR is quite large with:
+              - **${additions}** additions
+              - **${deletions}** deletions  
+              - **${changedFiles}** changed files
+              
+              ### Recommendations
+              - Consider breaking this into smaller, focused PRs
+              - Ensure comprehensive testing
+              - Provide detailed description of changes
+              - Consider requesting additional reviewers
+              
+              ### Review Process
+              Large PRs may take longer to review. Please be patient and responsive to feedback.`;
+            } else if (additions > 500 || deletions > 500 || changedFiles > 10) {
+              sizeLabels.push('medium-pr');
+              sizeComment = `## Medium-sized Pull Request 📐
+              
+              This PR has:
+              - **${additions}** additions
+              - **${deletions}** deletions
+              - **${changedFiles}** changed files
+              
+              Please ensure all changes are well-documented and tested.`;
+            } else {
+              sizeLabels.push('small-pr');
+              sizeComment = `## Small Pull Request 📝
+              
+              This PR has:
+              - **${additions}** additions
+              - **${deletions}** deletions
+              - **${changedFiles}** changed files
+              
+              Great! Small, focused PRs are easier to review and merge.`;
+            }
+            
+            // Apply size labels
+            if (sizeLabels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: sizeLabels
+              });
+            }
+            
+            // Add size comment
+            if (sizeComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: sizeComment
+              });
+            }
+          }
+          
+          if (github.event_name === 'pull_request' && github.event.action === 'closed' && github.event.pull_request.merged) {
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            
+            const comment = `## Congratulations! 🎉
+            
+            @${author}, your pull request has been successfully merged! 
+            
+            ### What you've accomplished:
+            - **${pr.additions}** lines added
+            - **${pr.deletions}** lines removed
+            - **${pr.changed_files}** files changed
+            
+            ### Impact
+            Your contribution helps improve Terminal Coding Agent for the entire community. Thank you for making the project better! 🚀
+            
+            ### Next Steps
+            - Consider contributing to other issues
+            - Share your experience with the community
+            - Stay updated with project developments
+            
+            **Merged on**: ${new Date(pr.merged_at).toLocaleDateString()}
+            
+            Keep up the great work! 👏`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: comment
+            });
+          }
+
+  maintenance:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Daily Maintenance
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Find stale issues
+          const { data: issues } = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            sort: 'updated',
+            direction: 'asc',
+            per_page: 100
+          });
+          
+          const staleIssues = issues.filter(issue => {
+            const lastUpdated = new Date(issue.updated_at);
+            const daysSinceUpdate = (new Date() - lastUpdated) / (1000 * 60 * 60 * 24);
+            return daysSinceUpdate > 30 && !issue.labels.some(label => label.name === 'stale');
+          });
+          
+          // Add stale label to old issues
+          for (const issue of staleIssues.slice(0, 5)) { // Limit to 5 per run
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ['stale']
+            });
+            
+            const comment = `## Stale Issue Reminder ⏰
+            
+            This issue has been open for a while without recent activity. Please:
+            
+            - [ ] Update the issue with current status
+            - [ ] Close if no longer relevant
+            - [ ] Add a comment if you're still working on it
+            
+            **Last updated**: ${new Date(issue.updated_at).toLocaleDateString()}
+            **Days since update**: ${Math.floor((new Date() - new Date(issue.updated_at)) / (1000 * 60 * 60 * 24))}
+            
+            If no response within 14 days, this issue will be automatically closed.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: comment
+            });
+          }
+          
+          // Find stale PRs
+          const { data: prs } = await github.rest.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            sort: 'updated',
+            direction: 'asc',
+            per_page: 50
+          });
+          
+          const stalePRs = prs.filter(pr => {
+            const lastUpdated = new Date(pr.updated_at);
+            const daysSinceUpdate = (new Date() - lastUpdated) / (1000 * 60 * 60 * 24);
+            return daysSinceUpdate > 14 && !pr.labels.some(label => label.name === 'stale');
+          });
+          
+          // Add stale label to old PRs
+          for (const pr of stalePRs.slice(0, 3)) { // Limit to 3 per run
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['stale']
+            });
+            
+            const comment = `## Stale Pull Request Reminder ⏰
+            
+            This PR has been open for a while without recent activity. Please:
+            
+            - [ ] Update the PR with current status
+            - [ ] Address any review feedback
+            - [ ] Close if no longer needed
+            - [ ] Add a comment if you're still working on it
+            
+            **Last updated**: ${new Date(pr.updated_at).toLocaleDateString()}
+            **Days since update**: ${Math.floor((new Date() - new Date(pr.updated_at)) / (1000 * 60 * 60 * 24))}
+            
+            If no response within 7 days, this PR will be automatically closed.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: comment
+            });
+          }

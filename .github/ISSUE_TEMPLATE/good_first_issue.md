@@ -7,41 +7,37 @@ assignees: ''
 
 ---
 
-## 👋 Welcome!
-This is a great issue for newcomers to the project! We'll provide extra guidance and support.
+## Welcome
+This issue is specifically designed for new contributors to the project. We provide comprehensive guidance and mentorship throughout the development process.
 
-## 📋 Issue Description
-A clear and concise description of the issue.
+## Issue Description
+Provide a detailed description of the issue and the specific work that needs to be completed.
 
-## 🎯 Learning Objectives
-What will you learn by working on this issue?
+## Learning Objectives
+What technical skills and knowledge will you gain by working on this issue?
 
-## 🛠️ Skills Required
+## Skills Required
 - [ ] Basic Python knowledge
 - [ ] Understanding of CLI applications
 - [ ] [Add other relevant skills]
 
-## 📚 Resources
+## Resources
 - [Link to relevant documentation]
 - [Link to similar issues or PRs]
 - [Link to code examples]
 
-## 🔧 Implementation Steps
+## Implementation Steps
 1. [Step 1]
 2. [Step 2]
 3. [Step 3]
 
-## 🧪 Testing
+## Testing
 How to test your changes:
 1. [Test step 1]
 2. [Test step 2]
 
-## 💬 Getting Help
-- Ask questions in the issue comments
-- Join our [community channel]
-- Check out our [contributing guide](CONTRIBUTION.md)
-
-## 🏷️ Additional Labels
-- `beginner-friendly`
-- `documentation`
-- `testing`
+## Support and Resources
+- Post questions and progress updates in the issue comments
+- Join our [community discussion channel]
+- Review our [comprehensive contributing guide](CONTRIBUTION.md)
+- Access our [developer documentation](README.md)

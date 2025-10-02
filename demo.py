@@ -15,9 +15,9 @@ from src.core.models import AgentConfig
 
 
 def demo_basic_functionality():
-    """Demonstrate basic functionality of the coding agent."""
-    print("🤖 Terminal Coding Agent Demo")
-    print("=" * 50)
+    """Demonstrate core functionality of the Terminal Coding Agent."""
+    print("Terminal Coding Agent - Core Functionality Demonstration")
+    print("=" * 60)
     
     # Initialize agent
     config = AgentConfig(
@@ -37,27 +37,27 @@ def demo_basic_functionality():
     ]
     
     for i, scenario in enumerate(demo_scenarios, 1):
-        print(f"\n📝 Demo {i}: {scenario}")
-        print("-" * 40)
+        print(f"\nScenario {i}: {scenario}")
+        print("-" * 50)
         
         try:
             turn = agent.process_input(scenario)
             
             if turn.success:
-                print("✅ Success!")
+                print("Status: Operation completed successfully")
             else:
-                print(f"❌ Failed: {turn.error_message}")
+                print(f"Status: Operation failed - {turn.error_message}")
                 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"System Error: {e}")
     
-    # Show final status
-    print("\n📊 Final Project Status:")
-    print("-" * 40)
+    # Display final project status
+    print("\nProject Status Summary:")
+    print("-" * 50)
     status = agent.get_project_status()
-    print(f"Active files: {len(status['active_files'])}")
-    print(f"Total turns: {status['conversation_stats']['total_turns']}")
-    print(f"Success rate: {status['conversation_stats']['success_rate']:.1%}")
+    print(f"Active Files: {len(status['active_files'])}")
+    print(f"Total Interactions: {status['conversation_stats']['total_turns']}")
+    print(f"Success Rate: {status['conversation_stats']['success_rate']:.1%}")
 
 
 if __name__ == "__main__":

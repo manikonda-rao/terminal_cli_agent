@@ -1,4 +1,4 @@
-# test.py
+# config.json
 
 This file was created by the Terminal Coding Agent.
 

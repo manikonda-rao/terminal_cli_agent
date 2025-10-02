@@ -1,46 +1,43 @@
-## 📝 Description
-Brief description of the changes in this PR.
+## Summary
+Provide a comprehensive overview of the changes implemented in this pull request.
 
-## 🔗 Related Issues
+## Related Issues
 Fixes #(issue number)
 Closes #(issue number)
 Related to #(issue number)
 
-## 🧪 Type of Change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
 - [ ] Documentation update
 - [ ] Performance improvement
 - [ ] Code refactoring
 - [ ] Test addition/update
 
-## 🎯 Changes Made
+## Implementation Details
 - [ ] Change 1
 - [ ] Change 2
 - [ ] Change 3
 
-## 🧪 Testing
+## Quality Assurance
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing completed
 - [ ] New tests added for new functionality
 
-## 📸 Screenshots/Demo
+## Screenshots/Demo
 If applicable, add screenshots or a demo of the changes.
 
-## 📋 Checklist
-- [ ] My code follows the project's style guidelines
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Code commented where necessary
+- [ ] Documentation updated
+- [ ] No new warnings generated
+- [ ] Tests added/updated
+- [ ] All tests pass locally
+- [ ] Dependent changes merged
 
-## 🚀 Deployment Notes
-Any special deployment considerations or requirements.
-
-## 📚 Additional Context
+## Additional Context
 Add any other context about the PR here.

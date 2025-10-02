@@ -47,19 +47,19 @@ class TerminalCLI:
     def _show_welcome(self):
         """Show welcome message and help."""
         welcome_text = """
-# 🤖 Terminal Coding Agent
+# Terminal Coding Agent
 
-Welcome to your AI-powered coding assistant! 
+Professional AI-powered development assistant for modern software engineering workflows.
 
-I can help you:
-- Create functions and classes from natural language descriptions
-- Modify existing code based on your instructions  
-- Execute and test your code safely
-- Manage files with automatic versioning and rollback
-- Search through your codebase
-- Maintain conversation context across interactions
+Core Capabilities:
+- Generate production-ready code from natural language specifications
+- Modify and refactor existing codebases with intelligent context awareness
+- Execute code safely within enterprise-grade sandboxed environments
+- Manage project files with automated version control and backup systems
+- Perform intelligent codebase search and analysis operations
+- Maintain persistent conversation context and project state
 
-Type your coding requests in natural language, or use `/help` for more information.
+Enter your development requests in natural language, or use `/help` for command reference.
         """
         
         self.console.print(Panel(
@@ -68,10 +68,10 @@ Type your coding requests in natural language, or use `/help` for more informati
             border_style="blue"
         ))
         
-        # Show project status
+        # Display project status
         status = self.agent.get_project_status()
-        self.console.print(f"📁 Project: {status['project_root']}")
-        self.console.print(f"📊 Conversation turns: {status['conversation_stats']['total_turns']}")
+        self.console.print(f"Project Root: {status['project_root']}")
+        self.console.print(f"Session Interactions: {status['conversation_stats']['total_turns']}")
         self.console.print()
     
     def run(self):
@@ -102,13 +102,13 @@ Type your coding requests in natural language, or use `/help` for more informati
                 self._display_turn_results(turn)
                 
             except KeyboardInterrupt:
-                self.console.print("\n\n👋 Goodbye!")
+                self.console.print("\n\nSession terminated by user.")
                 break
             except EOFError:
-                self.console.print("\n\n👋 Goodbye!")
+                self.console.print("\n\nSession terminated.")
                 break
             except Exception as e:
-                self.console.print(f"[red]❌ Unexpected error: {e}[/red]")
+                self.console.print(f"[red]System error: {e}[/red]")
     
     def _handle_special_command(self, command: str):
         """Handle special CLI commands."""
@@ -124,30 +124,30 @@ Type your coding requests in natural language, or use `/help` for more informati
         elif cmd == "/rollback":
             success = self.agent.rollback_last_operation()
             if success:
-                self.console.print("[green]✅ Rollback completed[/green]")
+                self.console.print("[green]Operation rollback completed successfully[/green]")
             else:
-                self.console.print("[red]❌ Rollback failed[/red]")
+                self.console.print("[red]Rollback operation failed[/red]")
         
         elif cmd == "/clear":
-            confirm = Prompt.ask("Are you sure you want to clear the project?", choices=["y", "n"], default="n")
+            confirm = Prompt.ask("Confirm project state reset (this action cannot be undone):", choices=["y", "n"], default="n")
             if confirm.lower() == "y":
                 self.agent.clear_project()
-                self.console.print("[green]✅ Project cleared[/green]")
+                self.console.print("[green]Project state reset completed[/green]")
         
         elif cmd == "/export":
             if len(parts) > 1:
                 export_path = parts[1]
                 self.agent.export_project(export_path)
             else:
-                self.console.print("[red]❌ Please specify export path: /export <path>[/red]")
+                self.console.print("[red]Export path required: /export <path>[/red]")
         
         elif cmd == "/quit":
-            self.console.print("👋 Goodbye!")
+            self.console.print("Terminal Coding Agent session ended.")
             self.running = False
         
         else:
-            self.console.print(f"[red]❌ Unknown command: {cmd}[/red]")
-            self.console.print("Type /help for available commands")
+            self.console.print(f"[red]Invalid command: {cmd}[/red]")
+            self.console.print("Use /help to view available commands")
     
     def _show_status(self):
         """Show detailed project status."""
@@ -170,7 +170,7 @@ Type your coding requests in natural language, or use `/help` for more informati
         
         # Show active files
         if status["active_files"]:
-            self.console.print("\n📁 Active Files:")
+            self.console.print("\nActive Files:")
             for file in status["active_files"][-5:]:  # Show last 5 files
                 self.console.print(f"  • {file}")
             if len(status["active_files"]) > 5:
@@ -178,7 +178,7 @@ Type your coding requests in natural language, or use `/help` for more informati
         
         # Show intent statistics
         if stats["intent_counts"]:
-            self.console.print("\n🎯 Intent Statistics:")
+            self.console.print("\nIntent Statistics:")
             for intent_type, count in stats["intent_counts"].items():
                 self.console.print(f"  • {intent_type}: {count}")
     
@@ -186,7 +186,7 @@ Type your coding requests in natural language, or use `/help` for more informati
         """Display conversation turn results with rich formatting."""
         # Show generated code
         if turn.generated_code:
-            self.console.print("\n[bold blue]📝 Generated Code:[/bold blue]")
+            self.console.print("\n[bold blue]Generated Code:[/bold blue]")
             for i, code_block in enumerate(turn.generated_code):
                 if len(turn.generated_code) > 1:
                     self.console.print(f"\n[bold]Code Block {i+1}:[/bold]")
@@ -202,7 +202,7 @@ Type your coding requests in natural language, or use `/help` for more informati
         
         # Show execution results
         if turn.execution_result:
-            self.console.print("\n[bold green]🚀 Execution Results:[/bold green]")
+            self.console.print("\n[bold green]Execution Results:[/bold green]")
             
             # Status
             status_color = "green" if turn.execution_result.status.value == "completed" else "red"
@@ -222,7 +222,7 @@ Type your coding requests in natural language, or use `/help` for more informati
         
         # Show file operations
         if turn.file_operations:
-            self.console.print("\n[bold yellow]📁 File Operations:[/bold yellow]")
+            self.console.print("\n[bold yellow]File Operations:[/bold yellow]")
             for file_op in turn.file_operations:
                 operation_color = {
                     "create": "green",
@@ -233,11 +233,11 @@ Type your coding requests in natural language, or use `/help` for more informati
                 
                 self.console.print(f"  [{operation_color}]{file_op.operation}[/{operation_color}] {file_op.filepath}")
         
-        # Show success/failure
+        # Display operation status
         if turn.success:
-            self.console.print("\n[green]✅ Operation completed successfully![/green]")
+            self.console.print("\n[green]Operation completed successfully[/green]")
         else:
-            self.console.print(f"\n[red]❌ Operation failed: {turn.error_message}[/red]")
+            self.console.print(f"\n[red]Operation failed: {turn.error_message}[/red]")
         
         self.console.print()  # Add spacing
 
