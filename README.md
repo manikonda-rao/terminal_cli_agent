@@ -187,71 +187,17 @@ The agent understands these types of requests:
 ## Documentation
 
 - [EXAMPLES.md](EXAMPLES.md) - Comprehensive usage examples
-- [CONTRIBUTION.md](CONTRIBUTION.md) - Contributing guidelines
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contributing guidelines
 - [ROADMAP.md](ROADMAP.md) - Development roadmap and stretch goals
 - [requirements.txt](requirements.txt) - Dependencies
 - [env.example](env.example) - Environment configuration template
 
-## Stretch Goals
-
-### Phase 1: Enhanced Intelligence
-- **Multi-Modal Input**: Voice commands and image-based code generation
-- **Advanced Code Explanation**: Detailed algorithm explanations with visualizations
-- **Performance Optimization**: Automatic code optimization suggestions
-- **Intelligent Bug Detection**: Pre-execution bug identification and fixes
-
-### Phase 2: Advanced Features
-- **Collaborative Coding**: Multi-user real-time coding sessions
-- **Automated Code Review**: AI-powered code review with suggestions
-- **Smart Refactoring**: Intelligent code refactoring recommendations
-- **Test Generation**: Automatic unit test generation from code analysis
-
-### Phase 3: Ecosystem Integration
-- **IDE Extensions**: VS Code, PyCharm, IntelliJ plugins
-- **CI/CD Integration**: GitHub Actions, GitLab CI, Jenkins support
-- **Cloud Deployment**: Deploy and run code in cloud environments
-- **API Generation**: REST APIs from natural language descriptions
-
-### Phase 4: Advanced AI Capabilities
-- **Code Translation**: Multi-language code translation
-- **Architecture Design**: System architecture from requirements
-- **Database Design**: Database schemas from natural language
-- **Microservices**: Microservice architecture generation
-
-### Phase 5: Enterprise Features
-- **Team Management**: User roles, permissions, collaboration
-- **Audit Logging**: Comprehensive logging and compliance
-- **Security Compliance**: SOC2, HIPAA, industry standards
-- **Scalability**: Horizontal scaling and load balancing
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTION.md](CONTRIBUTION.md) for detailed guidelines.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines and development setup instructions.
 
-### Quick Contribution Areas
-- **Bug Fixes**: Intent parsing, error handling, cross-platform issues
-- **New Features**: Additional LLM providers, languages, intent types
-- **Testing**: Unit tests, integration tests, performance benchmarks
-- **Documentation**: Tutorials, API docs, video demos
-- **Integrations**: IDE plugins, CI/CD, cloud deployment
+## Roadmap
 
-### Getting Started
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes and test them
-4. Commit: `git commit -m 'Add amazing feature'`
-5. Push: `git push origin feature/amazing-feature`
-6. Open a Pull Request
-
-## Vision and Roadmap
-
-The Terminal Coding Agent represents the next generation of AI-assisted development tools, designed to revolutionize how developers interact with code:
-
-- **Natural Language Programming**: Transform human intent into executable code through advanced language understanding
-- **Context-Aware Intelligence**: Maintain project context and development history for intelligent assistance
-- **Secure Development Environment**: Enterprise-grade security with sandboxed execution and resource management
-- **Intelligent Project Management**: Automated file operations, version control, and project state management
-- **Conversational Development**: Seamless interaction between developers and AI through natural language interfaces
-
-Experience the future of software development with our cutting-edge AI-powered coding assistant.
+For our development roadmap, future features, and strategic vision, see [ROADMAP.md](ROADMAP.md).
 
