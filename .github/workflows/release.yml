@@ -134,7 +134,11 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
-        twine upload dist/*
+        if [ -n "$TWINE_PASSWORD" ]; then
+          twine upload dist/*
+        else
+          echo "Skipping PyPI upload - PYPI_API_TOKEN not configured"
+        fi
 
   docker-release:
     runs-on: ubuntu-latest
@@ -150,6 +154,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+      continue-on-error: true
     
     - name: Extract metadata
       id: meta
@@ -166,7 +171,7 @@ jobs:
       with:
         context: .
         platforms: linux/amd64,linux/arm64
-        push: true
+        push: ${{ secrets.DOCKER_USERNAME != '' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
