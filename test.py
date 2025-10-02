@@ -16,7 +16,7 @@ from src.core.intent_parser import IntentParser
 
 def test_intent_parser():
     """Test the intent parsing functionality."""
-    print("🧪 Testing Intent Parser")
+    print("Testing Intent Parser")
     print("=" * 30)
     
     parser = IntentParser()
@@ -42,7 +42,7 @@ def test_intent_parser():
 
 def test_models():
     """Test the data models."""
-    print("\n🧪 Testing Data Models")
+    print("\nTesting Data Models")
     print("=" * 30)
     
     # Test AgentConfig
@@ -57,4 +57,4 @@ def test_models():
 if __name__ == "__main__":
     test_intent_parser()
     test_models()
-    print("\n✅ Tests completed!")
+    print("\nTests completed!")

@@ -1,19 +1,19 @@
-# 🤖 Terminal-Based Coding Agent
+# Terminal-Based Coding Agent
 
 A sophisticated CLI tool that accepts natural language instructions and translates them into code edits and execution steps. Built with Python and designed for developers who want to code through conversation.
 
-## ✨ Features
+## Features
 
-- **🧠 Natural Language Processing**: Parse user instructions into structured intents with high accuracy
-- **⚡ Code Generation**: Generate clean, well-documented code using LLM integration (OpenAI, Anthropic)
-- **🛡️ Safe Execution**: Sandboxed code execution with resource limits and process isolation
-- **📁 File Management**: Create, edit, and version code files with automatic backups and rollback
-- **💬 Multi-turn Conversations**: Maintain conversational memory and context across interactions
-- **🎨 Interactive CLI**: Rich terminal interface with syntax highlighting, autocompletion, and progress indicators
-- **🔄 Version Control**: Automatic git integration and backup management
-- **📊 Project State**: Persistent project state and conversation history
+- **Natural Language Processing**: Parse user instructions into structured intents with high accuracy
+- **Code Generation**: Generate clean, well-documented code using LLM integration (OpenAI, Anthropic)
+- **Safe Execution**: Sandboxed code execution with resource limits and process isolation
+- **File Management**: Create, edit, and version code files with automatic backups and rollback
+- **Multi-turn Conversations**: Maintain conversational memory and context across interactions
+- **Interactive CLI**: Rich terminal interface with syntax highlighting, autocompletion, and progress indicators
+- **Version Control**: Automatic git integration and backup management
+- **Project State**: Persistent project state and conversation history
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 terminal_cli/
@@ -30,7 +30,7 @@ terminal_cli/
 └── README.md         # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Installation
 
@@ -66,7 +66,7 @@ python -m src.cli.main --llm-provider anthropic --model claude-3-sonnet
 > /status
 ```
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### Basic Commands
 
@@ -108,7 +108,7 @@ python -m src.cli.main --llm-provider anthropic --model claude-3-sonnet
 - **Safe execution**: Code runs in isolated environment with resource limits
 - **Rich output**: Syntax highlighting, progress indicators, and formatted results
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run basic tests
@@ -124,7 +124,7 @@ python demo.py
 python setup.py
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 The agent supports extensive configuration options:
 
@@ -143,7 +143,7 @@ config = AgentConfig(
 )
 ```
 
-## 🔧 Supported Languages
+## Supported Languages
 
 - **Python** (primary)
 - **JavaScript/TypeScript**
@@ -152,7 +152,7 @@ config = AgentConfig(
 - **Rust**
 - **Go**
 
-## 🎯 Intent Types
+## Intent Types
 
 The agent understands these types of requests:
 
@@ -168,7 +168,7 @@ The agent understands these types of requests:
 - `debug_code` - Debug and fix issues
 - `test_code` - Generate test cases
 
-## 🛡️ Security Features
+## Security Features
 
 - **Sandboxed execution**: Code runs in isolated environment
 - **Resource limits**: CPU time and memory restrictions
@@ -176,7 +176,7 @@ The agent understands these types of requests:
 - **Automatic cleanup**: Temporary files and processes are cleaned up
 - **Error handling**: Graceful failure with detailed error messages
 
-## 📚 Documentation
+## Documentation
 
 - [EXAMPLES.md](EXAMPLES.md) - Comprehensive usage examples
 - [CONTRIBUTION.md](CONTRIBUTION.md) - Contributing guidelines
@@ -184,48 +184,48 @@ The agent understands these types of requests:
 - [requirements.txt](requirements.txt) - Dependencies
 - [env.example](env.example) - Environment configuration template
 
-## 🎯 Stretch Goals
+## Stretch Goals
 
 ### Phase 1: Enhanced Intelligence
-- **🧠 Multi-Modal Input**: Voice commands and image-based code generation
-- **📖 Advanced Code Explanation**: Detailed algorithm explanations with visualizations
-- **⚡ Performance Optimization**: Automatic code optimization suggestions
-- **🐛 Intelligent Bug Detection**: Pre-execution bug identification and fixes
+- **Multi-Modal Input**: Voice commands and image-based code generation
+- **Advanced Code Explanation**: Detailed algorithm explanations with visualizations
+- **Performance Optimization**: Automatic code optimization suggestions
+- **Intelligent Bug Detection**: Pre-execution bug identification and fixes
 
 ### Phase 2: Advanced Features
-- **👥 Collaborative Coding**: Multi-user real-time coding sessions
-- **🔍 Automated Code Review**: AI-powered code review with suggestions
-- **🔄 Smart Refactoring**: Intelligent code refactoring recommendations
-- **🧪 Test Generation**: Automatic unit test generation from code analysis
+- **Collaborative Coding**: Multi-user real-time coding sessions
+- **Automated Code Review**: AI-powered code review with suggestions
+- **Smart Refactoring**: Intelligent code refactoring recommendations
+- **Test Generation**: Automatic unit test generation from code analysis
 
 ### Phase 3: Ecosystem Integration
-- **🔌 IDE Extensions**: VS Code, PyCharm, IntelliJ plugins
-- **🚀 CI/CD Integration**: GitHub Actions, GitLab CI, Jenkins support
-- **☁️ Cloud Deployment**: Deploy and run code in cloud environments
-- **🌐 API Generation**: REST APIs from natural language descriptions
+- **IDE Extensions**: VS Code, PyCharm, IntelliJ plugins
+- **CI/CD Integration**: GitHub Actions, GitLab CI, Jenkins support
+- **Cloud Deployment**: Deploy and run code in cloud environments
+- **API Generation**: REST APIs from natural language descriptions
 
 ### Phase 4: Advanced AI Capabilities
-- **🔄 Code Translation**: Multi-language code translation
-- **🏗️ Architecture Design**: System architecture from requirements
-- **🗄️ Database Design**: Database schemas from natural language
-- **🔧 Microservices**: Microservice architecture generation
+- **Code Translation**: Multi-language code translation
+- **Architecture Design**: System architecture from requirements
+- **Database Design**: Database schemas from natural language
+- **Microservices**: Microservice architecture generation
 
 ### Phase 5: Enterprise Features
-- **👥 Team Management**: User roles, permissions, collaboration
-- **📊 Audit Logging**: Comprehensive logging and compliance
-- **🛡️ Security Compliance**: SOC2, HIPAA, industry standards
-- **📈 Scalability**: Horizontal scaling and load balancing
+- **Team Management**: User roles, permissions, collaboration
+- **Audit Logging**: Comprehensive logging and compliance
+- **Security Compliance**: SOC2, HIPAA, industry standards
+- **Scalability**: Horizontal scaling and load balancing
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! See [CONTRIBUTION.md](CONTRIBUTION.md) for detailed guidelines.
 
 ### Quick Contribution Areas
-- 🐛 **Bug Fixes**: Intent parsing, error handling, cross-platform issues
-- ✨ **New Features**: Additional LLM providers, languages, intent types
-- 🧪 **Testing**: Unit tests, integration tests, performance benchmarks
-- 📚 **Documentation**: Tutorials, API docs, video demos
-- 🔌 **Integrations**: IDE plugins, CI/CD, cloud deployment
+- **Bug Fixes**: Intent parsing, error handling, cross-platform issues
+- **New Features**: Additional LLM providers, languages, intent types
+- **Testing**: Unit tests, integration tests, performance benchmarks
+- **Documentation**: Tutorials, API docs, video demos
+- **Integrations**: IDE plugins, CI/CD, cloud deployment
 
 ### Getting Started
 1. Fork the repository
@@ -235,7 +235,7 @@ We welcome contributions! See [CONTRIBUTION.md](CONTRIBUTION.md) for detailed gu
 5. Push: `git push origin feature/amazing-feature`
 6. Open a Pull Request
 
-## 🎉 What's Next?
+## What's Next?
 
 This terminal coding agent showcases the future of AI-assisted development:
 
@@ -245,5 +245,5 @@ This terminal coding agent showcases the future of AI-assisted development:
 - Intelligent project management
 - Conversational development workflows
 
-Try it out and experience the future of coding! 🚀
+Try it out and experience the future of coding!
 # terminal_cli_agent

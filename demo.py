@@ -16,7 +16,7 @@ from src.core.models import AgentConfig
 
 def demo_basic_functionality():
     """Demonstrate basic functionality of the coding agent."""
-    print("🤖 Terminal Coding Agent Demo")
+    print("Terminal Coding Agent Demo")
     print("=" * 50)
     
     # Initialize agent
@@ -37,22 +37,22 @@ def demo_basic_functionality():
     ]
     
     for i, scenario in enumerate(demo_scenarios, 1):
-        print(f"\n📝 Demo {i}: {scenario}")
+        print(f"\nDemo {i}: {scenario}")
         print("-" * 40)
         
         try:
             turn = agent.process_input(scenario)
             
             if turn.success:
-                print("✅ Success!")
+                print("Success!")
             else:
-                print(f"❌ Failed: {turn.error_message}")
+                print(f"Failed: {turn.error_message}")
                 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
     
     # Show final status
-    print("\n📊 Final Project Status:")
+    print("\nFinal Project Status:")
     print("-" * 40)
     status = agent.get_project_status()
     print(f"Active files: {len(status['active_files'])}")
