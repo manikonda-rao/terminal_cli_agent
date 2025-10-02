@@ -386,6 +386,6 @@ We thank the following security researchers and organizations for their contribu
 
 ---
 
-*This security policy is effective as of [INSERT DATE] and will be reviewed annually or as needed.*
+*This security policy is effective as of 2025 and will be reviewed annually or as needed.*
 
 *For questions about this security policy, please contact [security@terminalcodingagent.com]*
