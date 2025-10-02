@@ -54,17 +54,31 @@ cp env.example .env
 # Edit .env with your API credentials
 ```
 
-### Initialization
+### Advanced Configuration
 
 ```bash
-# Launch the interactive interface
-python -m src.cli.main
-
-# Configure with specific model provider
+# Launch with specific model provider
 python -m src.cli.main --llm-provider anthropic --model claude-3-sonnet
+
+# Launch with OpenAI GPT-4
+python -m src.cli.main --llm-provider openai --model gpt-4
 ```
 
-### Basic Usage
+### Quick Start
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Set up environment (optional)
+cp env.example .env
+# Edit .env file with your API keys if you want to use real LLM providers
+
+# 3. Run the application
+python -m src.cli.main
+```
+
+### Basic Usage Examples
 
 ```
 > Create a Python function for quicksort
@@ -72,6 +86,19 @@ python -m src.cli.main --llm-provider anthropic --model claude-3-sonnet
 > Run the last function with [3, 1, 4, 1, 5]
 > Search for "def quicksort"
 > /status
+```
+
+### Demo Scripts
+
+```bash
+# Run basic demo
+python demo.py
+
+# Run intent parsing demo
+python simple_demo.py
+
+# Run tests
+python test.py
 ```
 
 ## Usage Examples
