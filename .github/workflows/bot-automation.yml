@@ -77,7 +77,7 @@ jobs:
             
             // Welcome newcomers for good first issues
             if (labels.includes('good first issue')) {
-              const comment = `## Welcome! 👋
+              const comment = `## Welcome! 
               
               Thank you for your interest in contributing to Terminal Coding Agent! This issue has been labeled as a good first issue, making it perfect for newcomers.
               
