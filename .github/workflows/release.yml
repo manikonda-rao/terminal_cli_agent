@@ -184,16 +184,16 @@ jobs:
           const release = context.payload.release || { tag_name: '${{ github.ref_name }}' };
           const success = '${{ needs.publish-pypi.result }}' === 'success';
           
-          let message = `## Release ${{ github.ref_name }} ${success ? 'Successfully Published' : 'Failed'} 🚀
+          let message = `## Release ${{ github.ref_name }} ${success ? 'Successfully Published' : 'Failed'}
           
           **Release**: ${{ github.ref_name }}
-          **Status**: ${success ? '✅ Published' : '❌ Failed'}
+          **Status**: ${success ? 'Published' : 'Failed'}
           **Date**: ${new Date().toLocaleDateString()}
           
           ### What's Available
-          - **PyPI Package**: ${success ? '✅ Published' : '❌ Failed'}
-          - **Docker Image**: ${{ needs.docker-release.result === 'success' ? '✅ Published' : '❌ Failed' }}
-          - **GitHub Release**: ✅ Published
+          - **PyPI Package**: ${success ? 'Published' : 'Failed'}
+          - **Docker Image**: ${{ needs.docker-release.result == 'success' && 'Published' || 'Failed' }}
+          - **GitHub Release**: Published
           
           ### Installation
           \`\`\`bash
@@ -210,7 +210,7 @@ jobs:
           - [PyPI Package](https://pypi.org/project/terminal-coding-agent/)
           - [Docker Hub](https://hub.docker.com/r/terminal-coding-agent)
           
-          Thank you to all contributors! 🎉`;
+          Thank you to all contributors!`;
           
           // Create a discussion post
           await github.rest.discussions.create({
