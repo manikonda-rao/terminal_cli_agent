@@ -1,48 +1,68 @@
 # Contributing to Terminal Coding Agent
 
-Thank you for your interest in contributing to the Terminal Coding Agent! This project aims to demonstrate advanced AI-assisted development capabilities and welcomes contributions from developers of all skill levels.
-## How to Contribute
-### Getting Started
+We welcome contributions from the developer community to advance the state of AI-assisted development tools. This document outlines our contribution guidelines, development standards, and community expectations for maintaining code quality and project integrity.
+## Development Setup
 
-1. **Fork the repository** and clone your fork
-2. **Set up the development environment**:
+### Prerequisites
+
+Before contributing, ensure your development environment meets the following requirements:
+- Python 3.8 or higher
+- Git version control system
+- Terminal with UTF-8 support
+- API credentials for LLM providers (optional for testing)
+
+### Environment Configuration
+
+1. **Fork and clone the repository**:
  ```bash
  git clone <your-fork-url>
  cd terminal_cli
+ ```
+
+2. **Install dependencies**:
+ ```bash
  pip install -r requirements.txt
  cp env.example .env
+ # Configure your API credentials in .env
  ```
-3. **Run the tests** to ensure everything works:
+
+3. **Verify installation**:
  ```bash
  python test.py
  python simple_demo.py
  ```
-### Development Workflow
+### Contribution Workflow
 
 1. **Create a feature branch**:
  ```bash
  git checkout -b feature/your-feature-name
  ```
 
-2. **Make your changes** following our coding standards
+2. **Implement changes** following our established coding standards and architectural patterns
 
-3. **Test your changes**:
+3. **Validate implementation**:
  ```bash
  python test.py
  python -m src.cli.main # Test the CLI
  ```
 
-4. **Commit your changes** with descriptive messages:
+4. **Commit changes** with descriptive messages:
  ```bash
  git commit -m "feat: add support for TypeScript code generation"
  ```
 
-5. **Push and create a Pull Request**
-## Areas for Contribution
-### 🐛 Bug Fixes
-- Fix intent parsing edge cases
-- Improve error handling
-- Resolve cross-platform compatibility issues
+5. **Submit for review**:
+ ```bash
+ git push origin feature/your-feature-name
+ # Create Pull Request via GitHub interface
+ ```
+## Contribution Areas
+
+### Bug Fixes and Improvements
+- Resolve intent parsing edge cases and improve accuracy
+- Enhance error handling and user feedback mechanisms
+- Address cross-platform compatibility issues
+- Optimize performance and resource utilization
 - Fix memory leaks or performance issues
 ### ✨ New Features
 #### Core Functionality

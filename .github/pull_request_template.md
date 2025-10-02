@@ -1,5 +1,5 @@
-## Description
-Brief description of the changes in this PR.
+## Summary
+Provide a comprehensive overview of the changes implemented in this pull request.
 
 ## Related Issues
 Fixes #(issue number)
@@ -15,12 +15,12 @@ Related to #(issue number)
 - [ ] Code refactoring
 - [ ] Test addition/update
 
-## Changes Made
+## Implementation Details
 - [ ] Change 1
 - [ ] Change 2
 - [ ] Change 3
 
-## Testing
+## Quality Assurance
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing completed

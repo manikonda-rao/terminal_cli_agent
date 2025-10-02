@@ -15,9 +15,9 @@ from src.core.intent_parser import IntentParser
 
 
 def test_intent_parser():
-    """Test the intent parsing functionality."""
-    print("Testing Intent Parser")
-    print("=" * 30)
+    """Validate intent parsing functionality."""
+    print("Intent Parser Validation Suite")
+    print("=" * 35)
     
     parser = IntentParser()
     
@@ -41,9 +41,9 @@ def test_intent_parser():
 
 
 def test_models():
-    """Test the data models."""
-    print("\nTesting Data Models")
-    print("=" * 30)
+    """Validate data model implementations."""
+    print("\nData Model Validation Suite")
+    print("=" * 35)
     
     # Test AgentConfig
     config = AgentConfig()
@@ -57,4 +57,4 @@ def test_models():
 if __name__ == "__main__":
     test_intent_parser()
     test_models()
-    print("\nTests completed!")
+    print("\nValidation suite completed successfully!")

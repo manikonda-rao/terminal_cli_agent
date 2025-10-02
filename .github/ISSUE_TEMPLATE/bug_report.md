@@ -8,18 +8,18 @@ assignees: ''
 ---
 
 ## Bug Description
-A clear and concise description of what the bug is.
+Provide a detailed description of the issue, including the specific functionality that is not working as expected.
 
 ## Steps to Reproduce
-1. Go to '...'
-2. Type '...'
-3. See error
+1. Navigate to '...'
+2. Execute '...'
+3. Observe error
 
 ## Expected Behavior
-A clear and concise description of what you expected to happen.
+Describe the expected system behavior and output.
 
 ## Actual Behavior
-A clear and concise description of what actually happened.
+Describe the actual system behavior and any error messages or unexpected output.
 
 ## Environment
 - OS: [e.g. macOS, Windows, Linux]
