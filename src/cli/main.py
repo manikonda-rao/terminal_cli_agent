@@ -145,19 +145,25 @@ class TerminalCLI:
     
     def _display_turn_results(self, turn):
         """Display conversation turn results with new UI formatting."""
-        # Show generated code
+        # Show generated responses
         if turn.generated_code:
-            ui.info("Code generation completed")
+            ui.info("Response generated")
             for i, code_block in enumerate(turn.generated_code):
-                title = "Generated Code"
-                if len(turn.generated_code) > 1:
-                    title = f"Generated Code Block {i+1}"
-                
-                ui.show_code_preview(
-                    code_block.content,
-                    code_block.language.value,
-                    title
-                )
+                # Check if this is a direct response
+                if code_block.metadata.get("type") == "direct_response":
+                    # Display as text response instead of code
+                    ui.show_direct_response(code_block.content, f"Response {i+1}" if len(turn.generated_code) > 1 else "Response")
+                else:
+                    # Display as code
+                    title = "Generated Code"
+                    if len(turn.generated_code) > 1:
+                        title = f"Generated Code Block {i+1}"
+                    
+                    ui.show_code_preview(
+                        code_block.content,
+                        code_block.language.value,
+                        title
+                    )
         
         # Show execution results
         if turn.execution_result:
@@ -191,26 +197,104 @@ class TerminalCLI:
 def main():
     """Main entry point for the CLI."""
     import argparse
+    import os
+    from dotenv import load_dotenv
+    
+    # Load environment variables from .env file
+    load_dotenv()
     
     parser = argparse.ArgumentParser(description="Terminal Coding Agent")
     parser.add_argument("--project-root", default=".",
                         help="Project root directory")
     parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--llm-provider", choices=["openai", "anthropic"],
-                        default="openai")
-    parser.add_argument("--model", default="gpt-4", help="LLM model name")
+                        help="LLM provider (if not specified, will prompt for selection)")
+    parser.add_argument("--model", help="LLM model name")
     
     args = parser.parse_args()
     
-    # Load configuration
+    # Determine LLM provider
+    llm_provider = args.llm_provider
+    if not llm_provider:
+        llm_provider = _select_llm_provider()
+    
+    # Determine model name
+    model_name = args.model
+    if not model_name:
+        model_name = _get_default_model(llm_provider)
+    
+    # Load configuration from environment
     config = AgentConfig(
-        llm_provider=args.llm_provider,
-        model_name=args.model
+        llm_provider=llm_provider,
+        model_name=model_name,
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+        max_execution_time=int(os.getenv("MAX_EXECUTION_TIME", "30")),
+        max_memory_mb=int(os.getenv("MAX_MEMORY_USAGE", "512")),
+        sandbox_timeout=int(os.getenv("SANDBOX_TIMEOUT", "60")),
+        enable_syntax_highlighting=os.getenv("ENABLE_SYNTAX_HIGHLIGHTING", "true").lower() == "true",
+        enable_autocomplete=os.getenv("ENABLE_AUTOCOMPLETE", "true").lower() == "true",
+        history_size=int(os.getenv("HISTORY_SIZE", "1000"))
     )
     
     # Create and run CLI
     cli = TerminalCLI(args.project_root, config)
     cli.run()
+
+
+def _select_llm_provider():
+    """Allow user to select LLM provider interactively."""
+    import os
+    from rich.prompt import Prompt
+    from rich.console import Console
+    
+    console = Console()
+    
+    # Check which providers are available
+    available_providers = []
+    
+    if os.getenv("OPENAI_API_KEY") and os.getenv("OPENAI_API_KEY") != "your_openai_api_key_here":
+        available_providers.append("openai")
+    
+    if os.getenv("ANTHROPIC_API_KEY") and os.getenv("ANTHROPIC_API_KEY") != "your_anthropic_api_key_here":
+        available_providers.append("anthropic")
+    
+    if not available_providers:
+        console.print("[red]❌ No LLM providers configured![/red]")
+        console.print("Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in your .env file")
+        console.print("Example:")
+        console.print("OPENAI_API_KEY=sk-your-key-here")
+        console.print("ANTHROPIC_API_KEY=sk-ant-your-key-here")
+        return None
+    
+    console.print("\n[bold blue]🤖 Available LLM Providers:[/bold blue]")
+    for i, provider in enumerate(available_providers, 1):
+        console.print(f"  {i}. {provider.title()}")
+    
+    while True:
+        try:
+            choice = Prompt.ask(
+                f"\n[cyan]Select LLM provider (1-{len(available_providers)})[/cyan]",
+                default="1"
+            )
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(available_providers):
+                selected_provider = available_providers[choice_idx]
+                console.print(f"[green]✅ Selected: {selected_provider.title()}[/green]")
+                return selected_provider
+            else:
+                console.print("[red]❌ Invalid choice. Please try again.[/red]")
+        except ValueError:
+            console.print("[red]❌ Please enter a valid number.[/red]")
+
+
+def _get_default_model(provider):
+    """Get default model for the selected provider."""
+    defaults = {
+        "openai": "gpt-4",
+        "anthropic": "claude-3-sonnet-20240229"
+    }
+    return defaults.get(provider, "gpt-4")
 
 
 if __name__ == "__main__":

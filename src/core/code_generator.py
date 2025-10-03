@@ -62,29 +62,36 @@ class ProviderConfig:
     enabled: bool = True
 
 class CodeGenerator:
-    def __init__(self, config: AgentConfig, prompt_manager: PromptTemplateManager):
+    def __init__(self, config: AgentConfig):
         self.config = config
-        self.prompt_manager = prompt_manager
-        self.client = OpenAI(api_key=config.openai_api_key)
-        self.anthropic_client = Anthropic(api_key=config.anthropic_api_key)
+        self.prompt_manager = PromptTemplateManager()
+        
+        # Initialize provider configurations
+        self.provider_configs = {}
+        self.providers = {}
+        self.rate_limit_tracker = {}
+        self.generation_history = []
+        
+        # Load environment variables
+        self._load_provider_configs()
+        
+        # Initialize clients
+        self._initialize_clients()
 
-    def _build_prompt(self, intent: Intent, context: Dict) -> str:
-        """Builds a prompt using the template manager instead of hardcoding."""
-        template_name = intent.type.value  # e.g. "create_function"
-        if template_name not in self.prompt_manager.templates:
-            template_name = "base"
-        return self.prompt_manager.render(intent, context, template_name)
-
-    async def generate_code(self, intent: Intent, context: Dict) -> str:
-        prompt = self._build_prompt(intent, context)
-        # Example: using OpenAI completion
-        response = await self.client.completions.create(
-            model=self.config.model,
-            prompt=prompt,
-            max_tokens=500,
-            temperature=0
-        )
-        return response.choices[0].text
+    def _load_provider_configs(self):
+        """Load provider configurations from environment variables."""
+        # OpenAI configuration
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if openai_key:
+            self.provider_configs[LLMProvider.OPENAI] = ProviderConfig(
+                name=LLMProvider.OPENAI,
+                api_key=openai_key,
+                model=self.config.model_name if self.config.llm_provider == "openai" else "gpt-4",
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                timeout=30,
+                retry_attempts=3
+            )
         
         # Anthropic configuration
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
@@ -304,75 +311,23 @@ class CodeGenerator:
             )
     
     def _build_prompt(self, intent: Intent, context: Dict) -> str:
-        """Build prompt for LLM based on intent and context."""
-        base_prompt = f"""You are an expert software developer. Generate clean, well-documented code based on the following request:
-
-Request: {intent.original_text}
-Intent Type: {intent.type.value}
-Language: {intent.language.value if intent.language else 'python'}
-Confidence: {intent.confidence}
-
-Parameters: {json.dumps(intent.parameters, indent=2)}
-
-Context: {json.dumps(context, indent=2)}
-
-Please generate code that:
-1. Is syntactically correct and follows best practices
-2. Includes appropriate comments and documentation
-3. Handles edge cases appropriately
-4. Is ready to run/test
-
-"""
+        """Builds a prompt using the template manager instead of hardcoding."""
+        template_name = intent.type.value  # e.g. "create_function"
         
-        # Add specific instructions based on intent type
-        if intent.type.value == "create_function":
-            base_prompt += f"""
-Generate a Python function that {intent.parameters.get('description', 'performs the requested operation')}.
-- Include proper type hints
-- Add docstring with description, parameters, and return value
-- Handle common edge cases
-- Use descriptive variable names
-"""
+        # Prepare variables for template rendering
+        variables = {
+            "intent": intent,
+            "context": context,
+            "original_text": intent.original_text,
+            "parameters": intent.parameters,
+            "language": intent.language.value if intent.language else "python"
+        }
         
-        elif intent.type.value == "create_class":
-            base_prompt += f"""
-Generate a Python class that {intent.parameters.get('description', 'implements the requested functionality')}.
-- Include proper class structure with __init__ method
-- Add docstrings for the class and methods
-- Include appropriate methods and properties
-- Follow Python naming conventions
-"""
-        
-        elif intent.type.value == "modify_code":
-            base_prompt += f"""
-Modify the existing code to {intent.parameters.get('description', 'implement the requested changes')}.
-- Preserve existing functionality where possible
-- Make minimal, focused changes
-- Update comments and documentation as needed
-- Ensure the modified code is still syntactically correct
-"""
-        
-        elif intent.type.value == "run_code":
-            base_prompt += f"""
-Generate code to test/run the existing function with the following test data: {intent.parameters.get('test_data', 'default test cases')}.
-- Include test cases that cover normal and edge cases
-- Add print statements to show results
-- Handle any potential errors gracefully
-"""
-        
-        base_prompt += "\n\nGenerate only the code, no explanations or markdown formatting."
-        
-        return base_prompt
-    
-    def _call_llm(self, prompt: str) -> str:
-        """Call the configured LLM to generate code."""
-        if self.config.llm_provider == "openai" and self.openai_client:
-            return self._call_openai(prompt)
-        elif self.config.llm_provider == "anthropic" and self.anthropic_client:
-            return self._call_anthropic(prompt)
-        else:
-            # Fallback to mock generation for testing
-            return self._mock_generate(prompt)
+        try:
+            return self.prompt_manager.render_for_intent(template_name, variables)
+        except FileNotFoundError:
+            # Fallback to base template
+            return self.prompt_manager.render("base", variables)
     
     def _call_openai(self, prompt: str, config: ProviderConfig) -> str:
         """Call OpenAI API to generate code with enhanced error handling."""

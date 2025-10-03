@@ -3,12 +3,13 @@ Main coding agent that orchestrates all components.
 """
 
 import os
+import json
 from typing import Optional, Dict, Any
 from datetime import datetime
 
 from .models import (
     Intent, CodeBlock, ConversationTurn,
-    AgentConfig, IntentType, ExecutionStatus
+    AgentConfig, IntentType, ExecutionStatus, CodeLanguage
 )
 from .intent_parser import IntentParser
 from .code_generator import CodeGenerator
@@ -72,21 +73,30 @@ class CodingAgent:
         steps = []
         
         try:
-            if intent.type in [IntentType.CREATE_FUNCTION, IntentType.CREATE_CLASS, IntentType.MODIFY_CODE]:
-                steps.append({'status': 'in_progress', 'message': 'Generating code'})
+            # For most intents, provide direct LLM response instead of generating functions
+            if intent.type in [IntentType.CREATE_FUNCTION, IntentType.CREATE_CLASS, IntentType.MODIFY_CODE, 
+                              IntentType.EXPLAIN_CODE, IntentType.REFACTOR_CODE, IntentType.DEBUG_CODE]:
+                
+                steps.append({'status': 'in_progress', 'message': 'Generating response'})
                 ui.show_execution_logs(steps)
                 
-                code_blocks = self.code_generator.generate_code(intent, intent_context)
+                # Get direct response from LLM
+                response_text = self._get_direct_response(user_input, intent, intent_context)
+                
+                # Create a code block with the response
+                response_block = CodeBlock(
+                    content=response_text,
+                    language=CodeLanguage.PYTHON,  # Default to Python for responses
+                    metadata={
+                        "type": "direct_response",
+                        "intent": intent.type.value,
+                        "generated_at": datetime.now().isoformat()
+                    }
+                )
+                code_blocks.append(response_block)
+                
                 steps[0]['status'] = 'completed'
-                steps.append({'status': 'in_progress', 'message': f'Generated {len(code_blocks)} code block(s)'})
-                
-                # Save code to file
-                for code_block in code_blocks:
-                    filename = self._determine_filename(code_block, intent)
-                    file_op = self.file_manager.create_file(filename, code_block.content)
-                    file_operations.append(file_op)
-                    steps.append({'status': 'completed', 'message': f'Saved code to {filename}'})
-                
+                steps[0]['message'] = 'Response generated successfully'
                 ui.show_execution_logs(steps)
                 
             elif intent.type == IntentType.RUN_CODE:
@@ -156,27 +166,26 @@ class CodingAgent:
                     
                     ui.display_search_results(results, query)
                 
-            elif intent.type == IntentType.EXPLAIN_CODE:
-                steps.append({'status': 'in_progress', 'message': 'Generating explanation'})
-                ui.show_execution_logs(steps)
-                
-                # Generate explanation
-                code_blocks = self.code_generator.generate_code(intent, intent_context)
-                steps[0]['status'] = 'completed'
-                ui.show_execution_logs(steps)
-                
-                ui.info("Code explanation:")
-                for code_block in code_blocks:
-                    ui.show_code_preview(code_block.content, "markdown", "Code Explanation")
-                
             else:
-                # Default: generate code
-                steps.append({'status': 'in_progress', 'message': 'Generating code'})
+                # Default: provide direct response
+                steps.append({'status': 'in_progress', 'message': 'Generating response'})
                 ui.show_execution_logs(steps)
                 
-                code_blocks = self.code_generator.generate_code(intent, intent_context)
+                response_text = self._get_direct_response(user_input, intent, intent_context)
+                
+                response_block = CodeBlock(
+                    content=response_text,
+                    language=CodeLanguage.PYTHON,
+                    metadata={
+                        "type": "direct_response",
+                        "intent": intent.type.value,
+                        "generated_at": datetime.now().isoformat()
+                    }
+                )
+                code_blocks.append(response_block)
+                
                 steps[0]['status'] = 'completed'
-                steps[0]['message'] = f'Generated {len(code_blocks)} code block(s)'
+                steps[0]['message'] = 'Response generated successfully'
                 ui.show_execution_logs(steps)
                 
         except Exception as e:
@@ -199,6 +208,41 @@ class CodingAgent:
         self.memory.add_turn(turn)
         
         return turn
+    
+    def _get_direct_response(self, user_input: str, intent: Intent, context: Dict) -> str:
+        """Get direct response from LLM instead of generating code."""
+        try:
+            # Build a conversational prompt
+            prompt = f"""You are a helpful coding assistant. The user has asked: "{user_input}"
+
+Intent detected: {intent.type.value}
+Context: {json.dumps(context, indent=2)}
+
+Please provide a helpful response. If the user is asking for code, provide the code with explanations.
+If they're asking questions, provide clear answers. Be conversational and helpful.
+
+Response:"""
+
+            # Use the code generator's LLM capabilities to get a response
+            # We'll create a simple intent for general response
+            response_intent = Intent(
+                type=IntentType.EXPLAIN_CODE,  # Use explain as a general response type
+                original_text=user_input,
+                parameters={"description": "Provide helpful response to user query"},
+                confidence=1.0
+            )
+            
+            # Generate response using the code generator
+            code_blocks = self.code_generator.generate_code(response_intent, context)
+            
+            if code_blocks:
+                return code_blocks[0].content
+            else:
+                return "I'm sorry, I couldn't generate a response. Please try rephrasing your question."
+                
+        except Exception as e:
+            ui.show_clean_error(e, "Direct response generation")
+            return f"I encountered an error while processing your request: {str(e)}"
     
     def _determine_filename(self, code_block: CodeBlock, intent: Intent) -> str:
         """Determine appropriate filename for code block."""
