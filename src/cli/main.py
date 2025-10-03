@@ -121,24 +121,24 @@ Enter your development requests in natural language, or use `/help` for command 
         parts = command.split()
         cmd = parts[0].lower()
         
-        if cmd == "/help":
-            self.agent.show_help()
+        # if cmd == "/help":
+        #     self.agent.show_help()
         
-        elif cmd == "/status":
-            self._show_status()
+        # elif cmd == "/status":
+        #     self._show_status()
         
-        elif cmd == "/rollback":
+        if cmd == "/rollback":
             success = self.agent.rollback_last_operation()
             if success:
                 self.console.print("[green]Operation rollback completed successfully[/green]")
             else:
                 self.console.print("[red]Rollback operation failed[/red]")
         
-        elif cmd == "/clear":
-            confirm = Prompt.ask("Confirm project state reset (this action cannot be undone):", choices=["y", "n"], default="n")
-            if confirm.lower() == "y":
-                self.agent.clear_project()
-                self.console.print("[green]Project state reset completed[/green]")
+        # elif cmd == "/clear":
+        #     confirm = Prompt.ask("Confirm project state reset (this action cannot be undone):", choices=["y", "n"], default="n")
+        #     if confirm.lower() == "y":
+        #         self.agent.clear_project()
+        #         self.console.print("[green]Project state reset completed[/green]")
         
         elif cmd == "/export":
             if len(parts) > 1:
@@ -155,38 +155,38 @@ Enter your development requests in natural language, or use `/help` for command 
             self.console.print(f"[red]Invalid command: {cmd}[/red]")
             self.console.print("Use /help to view available commands")
     
-    def _show_status(self):
-        """Show detailed project status."""
-        status = self.agent.get_project_status()
-        stats = status["conversation_stats"]
+    # def _show_status(self):
+    #     """Show detailed project status."""
+    #     status = self.agent.get_project_status()
+    #     stats = status["conversation_stats"]
         
-        # Create status table
-        table = Table(title="Project Status")
-        table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green")
+    #     # Create status table
+    #     table = Table(title="Project Status")
+    #     table.add_column("Metric", style="cyan")
+    #     table.add_column("Value", style="green")
         
-        table.add_row("Project Root", status["project_root"])
-        table.add_row("Active Files", str(len(status["active_files"])))
-        table.add_row("Total Turns", str(stats["total_turns"]))
-        table.add_row("Successful Turns", str(stats["successful_turns"]))
-        table.add_row("Failed Turns", str(stats["failed_turns"]))
-        table.add_row("Success Rate", f"{stats['success_rate']:.1%}")
+    #     table.add_row("Project Root", status["project_root"])
+    #     table.add_row("Active Files", str(len(status["active_files"])))
+    #     table.add_row("Total Turns", str(stats["total_turns"]))
+    #     table.add_row("Successful Turns", str(stats["successful_turns"]))
+    #     table.add_row("Failed Turns", str(stats["failed_turns"]))
+    #     table.add_row("Success Rate", f"{stats['success_rate']:.1%}")
         
-        self.console.print(table)
+    #     self.console.print(table)
         
-        # Show active files
-        if status["active_files"]:
-            self.console.print("\nActive Files:")
-            for file in status["active_files"][-5:]:  # Show last 5 files
-                self.console.print(f"  • {file}")
-            if len(status["active_files"]) > 5:
-                self.console.print(f"  ... and {len(status['active_files']) - 5} more")
+    #     # Show active files
+    #     if status["active_files"]:
+    #         self.console.print("\nActive Files:")
+    #         for file in status["active_files"][-5:]:  # Show last 5 files
+    #             self.console.print(f"  • {file}")
+    #         if len(status["active_files"]) > 5:
+    #             self.console.print(f"  ... and {len(status['active_files']) - 5} more")
         
-        # Show intent statistics
-        if stats["intent_counts"]:
-            self.console.print("\nIntent Statistics:")
-            for intent_type, count in stats["intent_counts"].items():
-                self.console.print(f"  • {intent_type}: {count}")
+    #     # Show intent statistics
+    #     if stats["intent_counts"]:
+    #         self.console.print("\nIntent Statistics:")
+    #         for intent_type, count in stats["intent_counts"].items():
+    #             self.console.print(f"  • {intent_type}: {count}")
     
     def _display_turn_results(self, turn):
         """Display conversation turn results with rich formatting."""
