@@ -65,21 +65,6 @@ python -m src.cli.main --llm-provider anthropic --model claude-3-sonnet
 
 # Launch with OpenAI GPT-4
 python -m src.cli.main --llm-provider openai --model gpt-4
-
-# Launch with Daytona sandboxing (requires DAYTONA_API_KEY)
-EXECUTION_MODE=daytona python -m src.cli.main
-
-# Launch with E2B sandboxing (requires E2B_API_KEY)
-EXECUTION_MODE=e2b python -m src.cli.main
-
-# Launch with Docker sandboxing
-EXECUTION_MODE=docker python -m src.cli.main
-
-# Launch with multi-language executor
-EXECUTION_MODE=multi python -m src.cli.main
-
-# Launch with auto-executor selection
-EXECUTION_MODE=auto python -m src.cli.main
 ```
 
 ### Quick Start
@@ -192,70 +177,9 @@ config = AgentConfig(
     max_execution_time=30,       # Execution timeout
     max_memory_mb=512,           # Memory limit
     enable_syntax_highlighting=True,
-    enable_autocomplete=True,
-    # Security Configuration
-    security_level="moderate",    # strict, moderate, permissive, custom
-    security_policy_file="security_policy.json",
-    enable_security_scanning=True,
-    enable_code_analysis=True,
-    enable_resource_monitoring=True,
-    # Execution Configuration
-    execution_mode="auto",        # auto, sandbox, docker, e2b, daytona, multi
-    preferred_executor=None      # Override auto-selection
+    enable_autocomplete=True
 )
 ```
-
-## Security Policy Configuration
-
-The agent supports flexible security policy configuration through JSON files:
-
-### Security Levels
-
-- **Strict**: Maximum security with minimal permissions
-- **Moderate**: Balanced security with reasonable permissions (default)
-- **Permissive**: Minimal restrictions for development
-- **Custom**: User-defined security policies
-
-### Security Policy File
-
-Create a `security_policy.json` file to customize security settings:
-
-```json
-{
-  "security_level": "moderate",
-  "network_policy": "restricted",
-  "file_system": {
-    "read_only_dirs": ["/app/data", "/usr/lib"],
-    "read_write_dirs": ["/tmp", "/app/logs"],
-    "blocked_dirs": ["/etc", "/root", "/home"],
-    "max_file_size_mb": 100
-  },
-  "resource_limits": {
-    "cpu_limit": "1",
-    "memory_limit_mb": 512,
-    "execution_timeout": 30,
-    "max_output_size_mb": 10,
-    "max_processes": 5
-  },
-  "patterns": {
-    "dangerous_patterns": ["import\\s+os", "subprocess\\.run"],
-    "allowed_patterns": ["import\\s+math", "import\\s+json"],
-    "custom_patterns": []
-  },
-  "enable_code_analysis": true,
-  "enable_security_scanning": true,
-  "enable_resource_monitoring": true,
-  "sandbox_mode": "auto"
-}
-```
-
-### Executor Selection
-
-The agent automatically selects the best executor based on security level:
-
-- **Strict**: Prefers Daytona → E2B → Docker
-- **Moderate**: Prefers Docker → Daytona → E2B → Sandbox
-- **Permissive**: Uses Multi-language executor
 
 ## Supported Languages
 
@@ -284,17 +208,11 @@ The agent understands these types of requests:
 
 ## Security Features
 
-- **Sandboxed execution**: Code runs in isolated environment with multiple security layers
-- **Daytona Integration**: Cloud-based sandboxing with enterprise-grade security
-- **E2B Integration**: Advanced cloud-based sandboxing for maximum security
-- **Docker Containers**: Process isolation with configurable security policies and resource limits
-- **Configurable Security Policies**: Flexible security configuration with predefined levels (strict, moderate, permissive) and custom policies
-- **Static Code Analysis**: Automated security scanning using Bandit and custom analyzers
-- **Resource limits**: CPU time and memory restrictions with monitoring
-- **Process isolation**: Prevents system access and malicious code execution
+- **Sandboxed execution**: Code runs in isolated environment
+- **Resource limits**: CPU time and memory restrictions
+- **Process isolation**: Prevents system access
 - **Automatic cleanup**: Temporary files and processes are cleaned up
 - **Error handling**: Graceful failure with detailed error messages
-- **Security Scanning**: Real-time detection of dangerous patterns and vulnerabilities
 
 ## Documentation
 
