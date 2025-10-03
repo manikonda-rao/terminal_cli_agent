@@ -47,10 +47,11 @@ class ExecutionStatus(str, Enum):
 
 class Intent(BaseModel):
     """Parsed intent from natural language input."""
+    # Accept enum (preferred) or raw string (for older callers/tests)
     type: IntentType
-    confidence: float = Field(ge=0.0, le=1.0)
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     parameters: Dict[str, Any] = Field(default_factory=dict)
-    original_text: str
+    original_text: str = ""
     language: Optional[CodeLanguage] = None
     context: Dict[str, Any] = Field(default_factory=dict)
 
@@ -114,6 +115,10 @@ class AgentConfig(BaseModel):
     # LLM Configuration
     llm_provider: str = "openai"
     model_name: str = "gpt-4"
+    # Backwards-compatible fields used in older code/tests
+    model: Optional[str] = None
+    openai_api_key: Optional[str] = None
+    anthropic_api_key: Optional[str] = None
     temperature: float = 0.1
     max_tokens: int = 2000
     

@@ -1,0 +1,13 @@
+inherits: base
+version: 1
+name: run_code
+template: |
+  {{ super }}
+
+  Generate code to test/run the existing function with the following test data: {{ test_data }}.
+  - Include tests that cover normal and edge cases
+  - Add print statements or assertions to show results
+  - Handle potential errors gracefully
+
+  Output only the test/run code. No extra text.
+
