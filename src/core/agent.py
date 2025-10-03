@@ -15,7 +15,9 @@ from .intent_parser import IntentParser
 from .code_generator import CodeGenerator
 from .file_manager import FileManager
 from .ui import ui
-from ..execution.sandbox import SandboxExecutor
+from ..execution.sandbox import SandboxExecutor, DockerExecutor
+from ..execution.e2b_executor import E2BExecutor, E2BExecutorWithSecurity
+from ..execution.multi_language_executor import MultiLanguageExecutor
 from ..memory.conversation import ConversationMemory
 
 
@@ -31,7 +33,30 @@ class CodingAgent:
         self.intent_parser = IntentParser()
         self.code_generator = CodeGenerator(self.config)
         self.file_manager = FileManager(project_root)
-        self.executor = SandboxExecutor(self.config)
+        
+        # Choose execution engine based on configuration
+        execution_mode = os.getenv("EXECUTION_MODE", "sandbox").lower()
+        if execution_mode == "e2b":
+            try:
+                self.executor = E2BExecutorWithSecurity(self.config)
+                ui.info("Using E2B executor with enhanced security")
+            except Exception as e:
+                ui.warning(f"E2B not available, falling back to Docker: {e}")
+                self.executor = DockerExecutor(self.config)
+                ui.info("Using Docker executor")
+        elif execution_mode == "docker":
+            self.executor = DockerExecutor(self.config)
+            ui.info("Using Docker executor")
+        elif execution_mode == "multi":
+            self.executor = MultiLanguageExecutor(self.config)
+            ui.info("Using multi-language executor")
+        else:
+            self.executor = SandboxExecutor(self.config)
+            ui.info("Using basic sandbox executor")
+        
+        # Initialize multi-language executor for fallback
+        self.multi_lang_executor = MultiLanguageExecutor(self.config)
+        
         self.memory = ConversationMemory(self.config, project_root)
         
         ui.info(f"Coding Agent initialized in {project_root}")
@@ -294,10 +319,22 @@ Response:"""
         stats = self.memory.get_statistics()
         project_state = self.file_manager.get_project_state()
         
+        # Get execution statistics
+        execution_stats = {}
+        if hasattr(self.executor, 'get_execution_statistics'):
+            execution_stats = self.executor.get_execution_statistics()
+        
+        # Get multi-language executor stats
+        multi_lang_stats = self.multi_lang_executor.get_execution_statistics()
+        
         return {
             "project_root": self.project_root,
             "active_files": project_state.active_files,
             "conversation_stats": stats,
+            "execution_stats": execution_stats,
+            "multi_language_stats": multi_lang_stats,
+            "supported_languages": self.multi_lang_executor.get_supported_languages(),
+            "available_languages": self.multi_lang_executor.get_available_languages(),
             "config": self.config.to_dict()
         }
     
