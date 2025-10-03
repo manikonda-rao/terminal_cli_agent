@@ -39,3 +39,7 @@ python-dotenv>=1.0.0
 pyyaml>=6.0.0
 colorama>=0.4.6
 prompt-toolkit>=3.0.0
+pyyaml>=6.0
+jinja2>=3.0
+pyyaml>=6.0
+jinja2>=3.0

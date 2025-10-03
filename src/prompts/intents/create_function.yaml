@@ -1,0 +1,14 @@
+inherits: base
+version: 1
+name: create_function
+template: |
+  {{ super }}
+
+  Generate a {{ language }} function that {{ description }}.
+  - Include proper type hints or type annotations appropriate for {{ language }}
+  - Add docstring or function comment with description, parameters, and return value
+  - Handle common edge cases
+  - Use descriptive variable names
+  - Keep implementation modular and testable
+
+  Generate only the code. Do not include explanations or markdown.

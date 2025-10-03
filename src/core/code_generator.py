@@ -13,6 +13,8 @@ from enum import Enum
 from openai import OpenAI, AsyncOpenAI
 from anthropic import Anthropic, AsyncAnthropic
 from .models import Intent, CodeBlock, CodeLanguage, AgentConfig
+from .prompt_manager import PromptTemplateManager
+
 
 
 class LLMProvider(str, Enum):
@@ -59,37 +61,30 @@ class ProviderConfig:
     rate_limit_delay: float = 1.0
     enabled: bool = True
 
-
 class CodeGenerator:
-    """Enterprise-grade code generation engine with multi-provider LLM integration framework."""
-    
-    def __init__(self, config: AgentConfig):
+    def __init__(self, config: AgentConfig, prompt_manager: PromptTemplateManager):
         self.config = config
-        self.providers = {}
-        self.provider_configs = {}
-        self.generation_history = []
-        self.rate_limit_tracker = {}
-        
-        # Initialize provider configurations
-        self._initialize_providers()
-        
-        # Initialize clients
-        self._initialize_clients()
-    
-    def _initialize_providers(self):
-        """Initialize provider configurations."""
-        # OpenAI configuration
-        openai_key = os.getenv("OPENAI_API_KEY")
-        if openai_key:
-            self.provider_configs[LLMProvider.OPENAI] = ProviderConfig(
-                name=LLMProvider.OPENAI,
-                api_key=openai_key,
-                model=self.config.model_name if self.config.llm_provider == "openai" else "gpt-4",
-                max_tokens=self.config.max_tokens,
-                temperature=self.config.temperature,
-                timeout=30,
-                retry_attempts=3
-            )
+        self.prompt_manager = prompt_manager
+        self.client = OpenAI(api_key=config.openai_api_key)
+        self.anthropic_client = Anthropic(api_key=config.anthropic_api_key)
+
+    def _build_prompt(self, intent: Intent, context: Dict) -> str:
+        """Builds a prompt using the template manager instead of hardcoding."""
+        template_name = intent.type.value  # e.g. "create_function"
+        if template_name not in self.prompt_manager.templates:
+            template_name = "base"
+        return self.prompt_manager.render(intent, context, template_name)
+
+    async def generate_code(self, intent: Intent, context: Dict) -> str:
+        prompt = self._build_prompt(intent, context)
+        # Example: using OpenAI completion
+        response = await self.client.completions.create(
+            model=self.config.model,
+            prompt=prompt,
+            max_tokens=500,
+            temperature=0
+        )
+        return response.choices[0].text
         
         # Anthropic configuration
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
