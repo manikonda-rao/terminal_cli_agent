@@ -12,8 +12,7 @@ class CommandRegistry:
         self.commands = {
             cmd.name : cmd for cmd in [
                 HelpCommand(cli, console), QuitCommand(cli, console), ExportCommand(cli, console),
-                RollbackCommand(cli, console), StatusCommand(cli, console),
-                ClearCommand(cli, console)
+                RollbackCommand(cli, console), StatusCommand(cli, console), ClearCommand(cli, console)
             ]
         }
 

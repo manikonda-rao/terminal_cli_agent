@@ -15,6 +15,8 @@ class ClearCommand(BaseCommand):
         return "/clear"
     
     def execute(self, args: list[str]):
+        self.validate_args(args, expected_count=0)
+        
         confirm = Prompt.ask(
             "Confirm project state reset? (This action cannot be undone!):",
             choices=["y", "n"],

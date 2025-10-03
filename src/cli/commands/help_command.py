@@ -17,6 +17,8 @@ class HelpCommand(BaseCommand):
         return "/help"
     
     def execute(self, args:list[str]):
+        self.validate_args(args, expected_count=0)
+        
         """Show help information."""
         help_text = """
         Terminal Coding Agent Help

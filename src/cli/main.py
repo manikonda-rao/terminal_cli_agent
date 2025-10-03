@@ -147,9 +147,9 @@ Enter your development requests in natural language, or use `/help` for command 
             else:
                 self.console.print("[red]Export path required: /export <path>[/red]")
         
-        elif cmd == "/quit":
-            self.console.print("Terminal Coding Agent session ended.")
-            self.running = False
+        # elif cmd == "/quit":
+        #     self.console.print("Terminal Coding Agent session ended.")
+        #     self.running = False
         
         else:
             self.console.print(f"[red]Invalid command: {cmd}[/red]")

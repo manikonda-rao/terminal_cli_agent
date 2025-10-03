@@ -6,7 +6,7 @@ class QuitCommand(BaseCommand):
     @property
     def name(self) -> str:
         """Return the command name."""
-        return "quit"
+        return "/quit"
     
     @property
     def description(self) -> str:
@@ -16,7 +16,7 @@ class QuitCommand(BaseCommand):
     @property
     def aliases(self) -> List[str]:
         """Return command aliases."""
-        return ["exit", "q"]
+        return ["/exit", "/q"]
     
     @property
     def usage(self) -> str:
@@ -26,6 +26,8 @@ class QuitCommand(BaseCommand):
     def execute(self, args: List[str]) -> bool:
         # Validate that no arguments were provided
         self.validate_args(args, expected_count=0)
+
+        self.cli.running = False
         
         # Display goodbye message
         self.console.print("\n[cyan]Terminal Coding Agent session ended.[/cyan]")
