@@ -17,8 +17,10 @@ from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 
-from .agent import CodingAgent
-from .models import AgentConfig
+from ..core.agent import CodingAgent
+from ..core.models import AgentConfig
+
+from .commands import CommandRegistry
 
 
 class TerminalCLI:
@@ -43,6 +45,8 @@ class TerminalCLI:
         ])
         
         self._show_welcome()
+
+        self.command_registry = CommandRegistry(self, self.console)
     
     def _show_welcome(self):
         """Show welcome message and help."""
@@ -92,7 +96,9 @@ Enter your development requests in natural language, or use `/help` for command 
                 
                 # Handle special commands
                 if user_input.startswith("/"):
-                    self._handle_special_command(user_input)
+                    self.command_registry.get_command(user_input)
+
+                    # self._handle_special_command(user_input)
                     continue
                 
                 # Process the input

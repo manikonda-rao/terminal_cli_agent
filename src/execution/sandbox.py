@@ -10,7 +10,7 @@ import psutil
 import signal
 from typing import Optional, Dict, Any
 from pathlib import Path
-from .models import CodeBlock, ExecutionResult, ExecutionStatus, AgentConfig
+from ..core.models import CodeBlock, ExecutionResult, ExecutionStatus, AgentConfig
 
 
 class SandboxExecutor:
