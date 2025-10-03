@@ -1,12 +1,19 @@
-def generated_function():
+def quicksort(arr):
     """
-    A generated function based on your request.
+    Sort an array using the quicksort algorithm.
+    
+    Args:
+        arr: List of comparable elements to sort
+        
+    Returns:
+        Sorted list
     """
-    # TODO: Implement the specific functionality
-    pass
-
-
-# Example usage
-if __name__ == "__main__":
-    result = generated_function()
-    print(f"Result: {result}")
+    if len(arr) <= 1:
+        return arr
+    
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    
+    return quicksort(left) + middle + quicksort(right)
