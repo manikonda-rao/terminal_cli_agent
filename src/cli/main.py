@@ -51,20 +51,20 @@ class TerminalCLI:
     def _show_welcome(self):
         """Show welcome message and help."""
         welcome_text = """
-# Terminal Coding Agent
+            # Terminal Coding Agent
 
-Professional AI-powered development assistant for modern software engineering workflows.
+            Professional AI-powered development assistant for modern software engineering workflows.
 
-Core Capabilities:
-- Generate production-ready code from natural language specifications
-- Modify and refactor existing codebases with intelligent context awareness
-- Execute code safely within enterprise-grade sandboxed environments
-- Manage project files with automated version control and backup systems
-- Perform intelligent codebase search and analysis operations
-- Maintain persistent conversation context and project state
+            Core Capabilities:
+            - Generate production-ready code from natural language specifications
+            - Modify and refactor existing codebases with intelligent context awareness
+            - Execute code safely within enterprise-grade sandboxed environments
+            - Manage project files with automated version control and backup systems
+            - Perform intelligent codebase search and analysis operations
+            - Maintain persistent conversation context and project state
 
-Enter your development requests in natural language, or use `/help` for command reference.
-        """
+            Enter your development requests in natural language, or use `/help` for command reference.
+            """
         
         self.console.print(Panel(
             Markdown(welcome_text),
@@ -127,12 +127,12 @@ Enter your development requests in natural language, or use `/help` for command 
         # elif cmd == "/status":
         #     self._show_status()
         
-        if cmd == "/rollback":
-            success = self.agent.rollback_last_operation()
-            if success:
-                self.console.print("[green]Operation rollback completed successfully[/green]")
-            else:
-                self.console.print("[red]Rollback operation failed[/red]")
+        # if cmd == "/rollback":
+        #     success = self.agent.rollback_last_operation()
+        #     if success:
+        #         self.console.print("[green]Operation rollback completed successfully[/green]")
+        #     else:
+        #         self.console.print("[red]Rollback operation failed[/red]")
         
         # elif cmd == "/clear":
         #     confirm = Prompt.ask("Confirm project state reset (this action cannot be undone):", choices=["y", "n"], default="n")
@@ -140,7 +140,7 @@ Enter your development requests in natural language, or use `/help` for command 
         #         self.agent.clear_project()
         #         self.console.print("[green]Project state reset completed[/green]")
         
-        elif cmd == "/export":
+        if cmd == "/export":
             if len(parts) > 1:
                 export_path = parts[1]
                 self.agent.export_project(export_path)

@@ -198,22 +198,22 @@ class CodingAgent:
         print(f" Rollback failed: {e}")
         return False
 
-#  def get_project_status(self) -> Dict[str, Any]:
-#     """Get current project status."""
-#     stats = self.memory.get_statistics()
-#     project_state = self.file_manager.get_project_state()
+ def get_project_status(self) -> Dict[str, Any]:
+    """Get current project status."""
+    stats = self.memory.get_statistics()
+    project_state = self.file_manager.get_project_state()
  
-#     return {
-#     "project_root": self.project_root,
-#     "active_files": project_state.active_files,
-#     "conversation_stats": stats,
-#     "config": self.config.to_dict()
-#     }
+    return {
+    "project_root": self.project_root,
+    "active_files": project_state.active_files,
+    "conversation_stats": stats,
+    "config": self.config.to_dict()
+    }
  
-#  def clear_project(self):
-#     """Clear project and reset state."""
-#     self.memory.clear_memory()
-#     print(" Project cleared and reset")
+ def clear_project(self):
+    """Clear project and reset state."""
+    self.memory.clear_memory()
+    print(" Project cleared and reset")
  
  def export_project(self, export_path: str):
     """Export project with conversation history."""
@@ -230,37 +230,3 @@ class CodingAgent:
  
     except Exception as e:
         print(f" Export failed: {e}")
- 
-#  def show_help(self):
-#     """Show help information."""
-#     help_text = """
-#     Terminal Coding Agent Help
-
-#     Available Commands:
-#     • Create a Python function for [description]
-#     • Write a class that [description]
-#     • Modify the last function to [description]
-#     • Run the last function with [test data]
-#     • Create a file called [filename]
-#     • Delete the file [filename]
-#     • Search for [query]
-#     • Explain the last function
-#     • Refactor the last function
-#     • Debug the last function
-#     • Test the last function
-
-#     Special Commands:
-#     • /help - Show this help
-#     • /status - Show project status
-#     • /rollback - Rollback last operation
-#     • /clear - Clear project
-#     • /export [path] - Export project
-#     • /quit - Exit the agent
-
-#     Examples:
-#     > Create a Python function for quicksort
-#     > Modify the last function to handle empty lists
-#     > Run the last function with [3, 1, 4, 1, 5]
-#     > Search for "def quicksort"
-#     """
-#     print(help_text)
