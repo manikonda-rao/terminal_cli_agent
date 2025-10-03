@@ -24,6 +24,7 @@ class CommandRegistry:
             command.execute(args)
         else:
             self.console.print(f"[red]Unknown command: {cmd_name}[/red]")
+            self.console.print("Use /help to view available commands")
     
     def list_commands(self):
         return self.commands.values()

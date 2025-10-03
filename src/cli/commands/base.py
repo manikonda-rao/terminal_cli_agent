@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List, Optional, Any, Dict
 from rich.console import Console
 
@@ -29,7 +29,7 @@ class BaseCommand:
     
     @property
     def usage(self) -> str:
-        return f"/{self.name}"
+        pass
     
     @abstractmethod
     def execute(self, args: List[str]) -> bool:
@@ -98,60 +98,5 @@ class BaseCommand:
                 f"Command '{self.name}' expects at most {max_count} argument(s), "
                 f"but {arg_count} were provided.\nUsage: {self.usage}"
             )
-    
-    def parse_args(self, args: List[str]) -> Dict[str, Any]:
-        """
-        Parse command arguments into a dictionary.
-        
-        Override this in subclasses for complex argument parsing.
-        Default implementation returns empty dict.
-        
-        Args:
-            args: List of arguments to parse
-        
-        Returns:
-            Dict[str, Any]: Parsed arguments as key-value pairs
-        """
-        return {}
-    
-    def _print_success(self, message: str) -> None:
-        """
-        Print a success message.
-        
-        Args:
-            message: Success message to display
-        """
-        self.console.print(f"[green]{message}[/green]")
-    
-    def _print_error(self, message: str) -> None:
-        """
-        Print an error message.
-        
-        Args:
-            message: Error message to display
-        """
-        self.console.print(f"[red]{message}[/red]")
-    
-    def _print_warning(self, message: str) -> None:
-        """
-        Print a warning message.
-        
-        Args:
-            message: Warning message to display
-        """
-        self.console.print(f"[yellow]{message}[/yellow]")
-    
-    def _print_info(self, message: str) -> None:
-        """
-        Print an informational message.
-        
-        Args:
-            message: Info message to display
-        """
-        self.console.print(f"[cyan]{message}[/cyan]")
-    
-    def __repr__(self) -> str:
-        """Return string representation of the command."""
-        return f"<{self.__class__.__name__}(name='{self.name}')>"
 
 

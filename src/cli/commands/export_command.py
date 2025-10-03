@@ -7,7 +7,14 @@ class ExportCommand(BaseCommand):
     
     @property
     def description(self) -> str:
-        pass
+        return "Exports the project with conversation history to the path specified."
+    
+    @property
+    def usage(self) -> str:
+        return "/export path/to/your/output/file"
 
-    def execute(self, args):
-        pass
+    def execute(self, args: list[str]):
+        self.validate_args(args, expected_count=1)
+        export_path = args[0]
+        
+        self.cli.agent.export_project(export_path)
