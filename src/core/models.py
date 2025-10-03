@@ -137,6 +137,17 @@ class AgentConfig(BaseModel):
     enable_autocomplete: bool = True
     history_size: int = 1000
     
+    # Security Configuration
+    security_policy_file: Optional[str] = None
+    security_level: str = "moderate"  # strict, moderate, permissive, custom
+    enable_security_scanning: bool = True
+    enable_code_analysis: bool = True
+    enable_resource_monitoring: bool = True
+    
+    # Execution Mode Configuration
+    execution_mode: str = "auto"  # auto, sandbox, docker, e2b, daytona, multi
+    preferred_executor: Optional[str] = None  # Override auto-selection
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary."""
         return self.model_dump()

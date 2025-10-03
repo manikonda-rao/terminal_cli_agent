@@ -124,6 +124,10 @@ class SandboxExecutor:
             # Track the process
             self.active_processes[process.pid] = process
             
+            # Monitor memory usage during execution
+            memory_usage = 0.0
+            max_memory_usage = 0.0
+            
             # Wait for completion with timeout
             try:
                 stdout, stderr = process.communicate(timeout=timeout)
@@ -141,11 +145,20 @@ class SandboxExecutor:
                     stderr=stderr,
                     return_code=return_code,
                     execution_time=time.time() - start_time,
+                    memory_used=max_memory_usage,
                     error_message=f"Execution timed out after {timeout} seconds"
                 )
             
             # Calculate execution time and memory usage
             execution_time = time.time() - start_time
+            
+            # Get final memory usage
+            try:
+                if process.pid in self.active_processes:
+                    process_info = psutil.Process(process.pid)
+                    memory_usage = process_info.memory_info().rss / 1024 / 1024  # Convert to MB
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                memory_usage = 0.0
             
             # Determine status based on return code
             if return_code == 0:
@@ -159,7 +172,7 @@ class SandboxExecutor:
                 stderr=stderr,
                 return_code=return_code,
                 execution_time=execution_time,
-                memory_used=0.0,  # TODO: Implement memory tracking
+                memory_used=memory_usage,
                 error_message=None if return_code == 0 else f"Process exited with code {return_code}"
             )
             

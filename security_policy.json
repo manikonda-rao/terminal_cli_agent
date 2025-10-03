@@ -1,0 +1,65 @@
+{
+  "security_level": "moderate",
+  "network_policy": "restricted",
+  "file_system": {
+    "read_only_dirs": ["/app/data", "/usr/lib"],
+    "read_write_dirs": ["/tmp", "/app/logs"],
+    "blocked_dirs": ["/etc", "/root", "/home"],
+    "max_file_size_mb": 100
+  },
+  "resource_limits": {
+    "cpu_limit": "1",
+    "memory_limit_mb": 512,
+    "execution_timeout": 30,
+    "max_output_size_mb": 10,
+    "max_processes": 5
+  },
+  "patterns": {
+    "dangerous_patterns": [
+      "import\\s+os",
+      "import\\s+subprocess",
+      "import\\s+socket",
+      "import\\s+urllib",
+      "import\\s+requests",
+      "os\\.system\\s*\\(",
+      "os\\.popen\\s*\\(",
+      "subprocess\\.run\\s*\\(",
+      "subprocess\\.call\\s*\\(",
+      "subprocess\\.Popen\\s*\\(",
+      "open\\s*\\(",
+      "file\\s*\\(",
+      "exec\\s*\\(",
+      "eval\\s*\\(",
+      "__import__\\s*\\(",
+      "compile\\s*\\(",
+      "getattr\\s*\\(",
+      "setattr\\s*\\(",
+      "delattr\\s*\\(",
+      "__builtins__",
+      "globals\\s*\\(",
+      "locals\\s*\\(",
+      "vars\\s*\\("
+    ],
+    "allowed_patterns": [
+      "import\\s+math",
+      "import\\s+random",
+      "import\\s+datetime",
+      "import\\s+json",
+      "import\\s+collections",
+      "import\\s+itertools",
+      "import\\s+functools",
+      "from\\s+math\\s+import",
+      "from\\s+random\\s+import",
+      "from\\s+datetime\\s+import",
+      "from\\s+json\\s+import",
+      "from\\s+collections\\s+import",
+      "from\\s+itertools\\s+import",
+      "from\\s+functools\\s+import"
+    ],
+    "custom_patterns": []
+  },
+  "enable_code_analysis": true,
+  "enable_security_scanning": true,
+  "enable_resource_monitoring": true,
+  "sandbox_mode": "auto"
+}

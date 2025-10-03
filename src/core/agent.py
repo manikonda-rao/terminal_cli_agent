@@ -15,6 +15,7 @@ from .intent_parser import IntentParser
 from .code_generator import CodeGenerator
 from .file_manager import FileManager
 from .ui import ui
+from ..execution.executor_factory import ExecutorFactory
 from ..execution.sandbox import SandboxExecutor, DockerExecutor
 from ..execution.e2b_executor import E2BExecutor, E2BExecutorWithSecurity
 from ..execution.multi_language_executor import MultiLanguageExecutor
@@ -34,25 +35,9 @@ class CodingAgent:
         self.code_generator = CodeGenerator(self.config)
         self.file_manager = FileManager(project_root)
         
-        # Choose execution engine based on configuration
-        execution_mode = os.getenv("EXECUTION_MODE", "sandbox").lower()
-        if execution_mode == "e2b":
-            try:
-                self.executor = E2BExecutorWithSecurity(self.config)
-                ui.info("Using E2B executor with enhanced security")
-            except Exception as e:
-                ui.warning(f"E2B not available, falling back to Docker: {e}")
-                self.executor = DockerExecutor(self.config)
-                ui.info("Using Docker executor")
-        elif execution_mode == "docker":
-            self.executor = DockerExecutor(self.config)
-            ui.info("Using Docker executor")
-        elif execution_mode == "multi":
-            self.executor = MultiLanguageExecutor(self.config)
-            ui.info("Using multi-language executor")
-        else:
-            self.executor = SandboxExecutor(self.config)
-            ui.info("Using basic sandbox executor")
+        # Initialize executor factory
+        self.executor_factory = ExecutorFactory(self.config)
+        self.executor = self.executor_factory.create_executor()
         
         # Initialize multi-language executor for fallback
         self.multi_lang_executor = MultiLanguageExecutor(self.config)
