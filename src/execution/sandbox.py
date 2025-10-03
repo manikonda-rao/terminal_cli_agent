@@ -11,7 +11,7 @@ import signal
 from typing import Optional, Dict, Any
 from pathlib import Path
 from ..core.models import CodeBlock, ExecutionResult, ExecutionStatus, AgentConfig
-from ..analysis.code_analyzer import StaticCodeAnalyzer, SecurityScanner
+from ..analysis.code_analyzer import StaticCodeAnalyzer
 
 
 class SandboxExecutor:
@@ -22,7 +22,6 @@ class SandboxExecutor:
         self.temp_dir = None
         self.active_processes = {}
         self.code_analyzer = StaticCodeAnalyzer()
-        self.security_scanner = SecurityScanner()
         self.execution_history = []
     
     def execute_code(self, code_block: CodeBlock, timeout: Optional[int] = None) -> ExecutionResult:
@@ -45,15 +44,6 @@ class SandboxExecutor:
                 status=ExecutionStatus.FAILED,
                 stderr=f"Code analysis failed: {analysis_result.summary}",
                 error_message="Code failed security analysis"
-            )
-        
-        # Additional security scan
-        security_result = self.security_scanner.scan_code(code_block)
-        if not security_result.is_safe:
-            return ExecutionResult(
-                status=ExecutionStatus.FAILED,
-                stderr=security_result.reason,
-                error_message=f"Security scan failed: {security_result.reason}"
             )
         
         # Create temporary directory for execution

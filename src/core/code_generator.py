@@ -121,7 +121,7 @@ class CodeGenerator:
             )
     
     def _initialize_clients(self):
-        """Initialize LLM clients."""
+        """Initialize LLM clients with improved error handling."""
         # OpenAI client
         if LLMProvider.OPENAI in self.provider_configs:
             try:
@@ -132,6 +132,9 @@ class CodeGenerator:
                 print(f"✓ OpenAI client initialized")
             except Exception as e:
                 print(f"✗ Failed to initialize OpenAI client: {e}")
+                # Disable the provider if initialization fails
+                if LLMProvider.OPENAI in self.provider_configs:
+                    self.provider_configs[LLMProvider.OPENAI].enabled = False
         
         # Anthropic client
         if LLMProvider.ANTHROPIC in self.provider_configs:
@@ -143,6 +146,22 @@ class CodeGenerator:
                 print(f"✓ Anthropic client initialized")
             except Exception as e:
                 print(f"✗ Failed to initialize Anthropic client: {e}")
+                # Disable the provider if initialization fails
+                if LLMProvider.ANTHROPIC in self.provider_configs:
+                    self.provider_configs[LLMProvider.ANTHROPIC].enabled = False
+    
+    def get_provider_status(self) -> Dict[str, Any]:
+        """Get status of all configured providers."""
+        status = {}
+        for provider, config in self.provider_configs.items():
+            status[provider.value] = {
+                "configured": True,
+                "enabled": config.enabled,
+                "client_initialized": provider in self.providers,
+                "model": config.model,
+                "available": config.enabled and provider in self.providers
+            }
+        return status
     
     def _get_primary_provider(self) -> Optional[LLMProvider]:
         """Get the primary provider based on configuration."""
@@ -225,9 +244,40 @@ class CodeGenerator:
         return self._fallback_to_mock(prompt, intent)
     
     def _try_provider(self, provider: LLMProvider, prompt: str, intent: Intent) -> GenerationResult:
-        """Try to generate code using a specific provider."""
+        """Try to generate code using a specific provider with improved error handling."""
         start_time = time.time()
+        
+        # Check if provider is available and enabled
+        if provider not in self.provider_configs:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} not configured"
+            )
+        
         config = self.provider_configs[provider]
+        
+        # Check if provider is enabled
+        if not config.enabled:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} is disabled"
+            )
+        
+        # Check if provider client is available
+        if provider not in self.providers:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} client not initialized"
+            )
         
         # Check rate limits
         if self._is_rate_limited(provider):
@@ -259,6 +309,8 @@ class CodeGenerator:
             )
             
         except Exception as e:
+            # Log the error for debugging
+            print(f"Error with {provider} provider: {e}")
             return GenerationResult(
                 status=GenerationStatus.FAILED,
                 code_blocks=[],
@@ -346,8 +398,9 @@ class CodeGenerator:
             )
             return response.choices[0].message.content
         except Exception as e:
-            print(f"OpenAI API error: {e}")
-            raise e
+            error_msg = f"OpenAI API error: {type(e).__name__}: {e}"
+            print(error_msg)
+            raise Exception(error_msg)
     
     def _call_anthropic(self, prompt: str, config: ProviderConfig) -> str:
         """Call Anthropic API to generate code with enhanced error handling."""
@@ -364,8 +417,9 @@ class CodeGenerator:
             )
             return response.content[0].text
         except Exception as e:
-            print(f"Anthropic API error: {e}")
-            raise e
+            error_msg = f"Anthropic API error: {type(e).__name__}: {e}"
+            print(error_msg)
+            raise Exception(error_msg)
     
     def _mock_generate(self, prompt: str) -> str:
         """Mock code generation for testing when no API keys are available."""
