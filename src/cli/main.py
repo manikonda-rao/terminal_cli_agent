@@ -11,6 +11,7 @@ from prompt_toolkit.completion import WordCompleter
 
 from ..core.agent import CodingAgent
 from ..core.models import AgentConfig
+from ..core.streaming import streaming_response, smart_completer
 
 from .commands import CommandRegistry
 from ..core.ui import ui
@@ -32,8 +33,8 @@ class TerminalCLI:
             current_file=""
         )
         
-        # Setup autocompletion
-        self.completer = WordCompleter([
+        # Setup enhanced autocompletion
+        base_commands = [
             "create", "write", "implement", "make", "build",
             "modify", "change", "update", "edit", "fix",
             "run", "execute", "test", "call",
@@ -42,7 +43,14 @@ class TerminalCLI:
             "quicksort", "bubble sort", "binary search",
             "search", "find", "explain", "debug", "refactor",
             "/help", "/status", "/rollback", "/clear", "/export", "/quit"
-        ])
+        ]
+        
+        # Add smart completions
+        smart_completions = []
+        for word in base_commands:
+            smart_completions.extend(smart_completer.get_completions(word))
+        
+        self.completer = WordCompleter(list(set(base_commands + smart_completions)))
         
         self._show_welcome()
 
@@ -55,17 +63,13 @@ class TerminalCLI:
         # Display project status
         status = self.agent.get_project_status()
         ui.info(f"Project Root: {status['project_root']}")
-        total_turns = status['conversation_stats']['total_turns']
-        ui.info(f"Session Interactions: {total_turns}")
+        ui.info(f"Active Files: {len(status['active_files'])}")
         self.console.print()
     
     def run(self):
-        """Main CLI loop."""
+        """Main CLI loop - streamlined for faster interaction."""
         while self.running:
             try:
-                # Show session header
-                ui.show_session_header()
-                
                 # Get user input with history and autocompletion
                 user_input = prompt(
                     "> ",
@@ -81,13 +85,10 @@ class TerminalCLI:
                 # Handle special commands
                 if user_input.startswith("/"):
                     self.command_registry.get_command(user_input)
-
-                    # self._handle_special_command(user_input)
                     continue
                 
-                # Process the input with loading indicator
-                with ui.show_loading("Processing your request..."):
-                    turn = self.agent.process_input(user_input)
+                # Process the input directly without loading indicators
+                turn = self.agent.process_input(user_input)
                 
                 # Display results with rich formatting
                 self._display_turn_results(turn)
@@ -177,6 +178,10 @@ def main():
     if not llm_provider:
         llm_provider = _select_llm_provider()
     
+    # If no provider is available, exit gracefully
+    if not llm_provider:
+        return
+    
     # Determine model name
     model_name = args.model
     if not model_name:
@@ -224,6 +229,7 @@ def _select_llm_provider():
         console.print("Example:")
         console.print("OPENAI_API_KEY=sk-your-key-here")
         console.print("ANTHROPIC_API_KEY=sk-ant-your-key-here")
+        console.print("\n[yellow]💡 Tip: Create a .env file in your project root with your API keys.[/yellow]")
         return None
     
     console.print("\n[bold blue]🤖 Available LLM Providers:[/bold blue]")

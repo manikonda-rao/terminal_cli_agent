@@ -8,4 +8,7 @@ __pycache__
 *.pyz
 *.pywz
 *.pyzw
-*.pyzwz
+*.pyzwz.env.backup
+restore_env.sh
+.env.backup
+
