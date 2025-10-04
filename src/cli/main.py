@@ -177,6 +177,10 @@ def main():
     if not llm_provider:
         llm_provider = _select_llm_provider()
     
+    # If no provider is available, exit gracefully
+    if not llm_provider:
+        return
+    
     # Determine model name
     model_name = args.model
     if not model_name:
@@ -224,6 +228,7 @@ def _select_llm_provider():
         console.print("Example:")
         console.print("OPENAI_API_KEY=sk-your-key-here")
         console.print("ANTHROPIC_API_KEY=sk-ant-your-key-here")
+        console.print("\n[yellow]💡 Tip: Create a .env file in your project root with your API keys.[/yellow]")
         return None
     
     console.print("\n[bold blue]🤖 Available LLM Providers:[/bold blue]")
