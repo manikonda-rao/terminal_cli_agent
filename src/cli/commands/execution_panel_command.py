@@ -6,8 +6,8 @@ from typing import Optional
 from rich.console import Console
 
 from .base import BaseCommand
-from ..core.execution_panel import InteractiveExecutionPanel, ExecutionPanelConfig
-from ..core.models import AgentConfig
+from ...core.execution_panel import InteractiveExecutionPanel, ExecutionPanelConfig
+from ...core.models import AgentConfig
 
 
 class ExecutionPanelCommand(BaseCommand):
@@ -15,11 +15,21 @@ class ExecutionPanelCommand(BaseCommand):
     
     def __init__(self, cli, console: Console):
         super().__init__(cli, console)
-        self.name = "execution-panel"
-        self.description = "Launch interactive code execution panel"
         self.aliases = ["panel", "exec", "run-panel"]
     
-    def execute(self, args: Optional[str] = None):
+    @property
+    def name(self) -> str:
+        return "execution-panel"
+    
+    @property
+    def description(self) -> str:
+        return "Launch interactive code execution panel"
+    
+    @property
+    def usage(self) -> str:
+        return "/execution-panel or /panel"
+    
+    def execute(self, args: list[str]):
         """Execute the execution panel command."""
         try:
             # Create panel configuration

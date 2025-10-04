@@ -68,6 +68,14 @@ class TerminalCLI:
     
     def run(self):
         """Main CLI loop - streamlined for faster interaction."""
+        import sys
+        
+        # Check if running in non-interactive mode
+        if not sys.stdin.isatty():
+            ui.warning("Running in non-interactive mode. CLI requires an interactive terminal.")
+            ui.info("Please run the application in an interactive terminal to use the CLI interface.")
+            return
+        
         while self.running:
             try:
                 # Get user input with history and autocompletion

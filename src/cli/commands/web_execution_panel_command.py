@@ -9,8 +9,8 @@ import threading
 import time
 
 from .base import BaseCommand
-from ..core.web_execution_panel import WebExecutionPanel
-from ..core.models import AgentConfig
+from ...core.web_execution_panel import WebExecutionPanel
+from ...core.models import AgentConfig
 
 
 class WebExecutionPanelCommand(BaseCommand):
@@ -18,11 +18,21 @@ class WebExecutionPanelCommand(BaseCommand):
     
     def __init__(self, cli, console: Console):
         super().__init__(cli, console)
-        self.name = "web-panel"
-        self.description = "Launch web-based interactive code execution panel"
         self.aliases = ["web", "browser-panel", "web-exec"]
     
-    def execute(self, args: Optional[str] = None):
+    @property
+    def name(self) -> str:
+        return "web-panel"
+    
+    @property
+    def description(self) -> str:
+        return "Launch web-based interactive code execution panel"
+    
+    @property
+    def usage(self) -> str:
+        return "/web-panel [host] [port]"
+    
+    def execute(self, args: list[str]):
         """Execute the web execution panel command."""
         try:
             # Parse arguments for host and port
@@ -30,14 +40,13 @@ class WebExecutionPanelCommand(BaseCommand):
             port = 5000
             
             if args:
-                parts = args.split()
-                if len(parts) >= 1:
-                    host = parts[0]
-                if len(parts) >= 2:
+                if len(args) >= 1:
+                    host = args[0]
+                if len(args) >= 2:
                     try:
-                        port = int(parts[1])
+                        port = int(args[1])
                     except ValueError:
-                        self.console.print(f"[red]Invalid port: {parts[1]}[/red]")
+                        self.console.print(f"[red]Invalid port: {args[1]}[/red]")
                         return
             
             # Show welcome message
