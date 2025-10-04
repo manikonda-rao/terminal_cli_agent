@@ -4,21 +4,33 @@ Advanced natural language intent parsing engine with sophisticated NLP capabilit
 
 import re
 import json
+import time
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
 from .models import Intent, IntentType, CodeLanguage
+from .intent_cache import IntentCache
+from .pattern_optimizer import PatternOptimizer
+from .semantic_cache import SemanticCache
+from .performance_monitor import PerformanceMonitor
+
 
 
 class IntentParser:
     """Advanced natural language intent parsing engine with sophisticated NLP capabilities."""
     
-    def __init__(self):
+    def __init__(self, ttl: Optional[int] = None):
         self.intent_patterns = self._build_intent_patterns()
         self.language_keywords = self._build_language_keywords()
         self.context_weights = self._build_context_weights()
         self.semantic_patterns = self._build_semantic_patterns()
         self.confidence_threshold = 0.6
-        self.parsing_history = []
+        self.parsing_history: List[Dict[str, Any]] = []
+        self.cache = IntentCache(max_size=500, ttl=300)
+        self.pattern_optimizer = PatternOptimizer(self.intent_patterns)
+        # semantic cache supports optional ttl for tests
+        self.semantic_cache = SemanticCache(max_size=1000, ttl=ttl)
+        self.monitor = PerformanceMonitor()
+
     
     def _build_intent_patterns(self) -> Dict[IntentType, List[str]]:
         """Build regex patterns for different intent types."""
@@ -98,69 +110,151 @@ class IntentParser:
             CodeLanguage.RUST: ["rust", "fn", "struct", "impl"],
             CodeLanguage.GO: ["go", "golang", "func", "package"],
         }
-    
     def parse(self, text: str, context: Optional[Dict] = None) -> Intent:
         """
-        Parse natural language text into a structured intent.
-        
-        Args:
-            text: Natural language input
-            context: Additional context for parsing
-            
-        Returns:
-            Parsed intent with confidence score
+        Parse natural language text into a structured intent with advanced NLP.
         """
-        text = text.strip().lower()
+        start_time = time.time()
+        cache_key = (text, tuple(sorted(context.items())) if context else None)
+
+        # Check cache
+        try:
+            cached = self.cache.get(cache_key)
+        except Exception:
+            cached = None
+
+        if cached:
+            try:
+                self.monitor.record_cache_hit()
+            except Exception:
+                pass
+            return cached
+
+        try:
+            self.monitor.record_cache_miss()
+        except Exception:
+            pass
+
+        text = text.strip()
+        lowered = text.lower()
         context = context or {}
-        
-        # Find the best matching intent
+
         best_intent = None
         best_confidence = 0.0
-        best_parameters = {}
-        
+        best_parameters: Dict[str, Any] = {}
+
         for intent_type, patterns in self.intent_patterns.items():
-            for pattern in patterns:
-                match = re.search(pattern, text, re.IGNORECASE)
+            # allow pattern optimizer to provide tuned regex objects if available
+            try:
+                candidate_patterns = self.pattern_optimizer.get_patterns(intent_type)
+            except Exception:
+                candidate_patterns = [re.compile(pat, re.IGNORECASE) for pat in patterns]
+
+            for pat in candidate_patterns:
+                # compile if a string
+                if isinstance(pat, str):
+                    pattern_obj = re.compile(pat, re.IGNORECASE)
+                else:
+                    pattern_obj = pat
+
+                match = pattern_obj.search(text)
                 if match:
-                    confidence = self._calculate_confidence(text, pattern, match)
-                    if confidence > best_confidence:
+                    confidence = self._calculate_confidence(lowered, pattern_obj.pattern, match, intent_type)
+                    semantic_confidence = self._calculate_semantic_confidence(lowered, intent_type)
+                    context_relevance = self._analyze_context_relevance(lowered, context)
+
+                    total_confidence = (
+                        confidence * 0.4 + semantic_confidence * 0.3 + context_relevance * 0.3
+                    )
+
+                    if total_confidence > best_confidence:
                         best_intent = intent_type
-                        best_confidence = confidence
-                        best_parameters = self._extract_parameters(match, intent_type)
-        
-        # Default to CREATE_FUNCTION if no pattern matches
-        if best_intent is None:
+                        best_confidence = total_confidence
+                        best_parameters = self._extract_advanced_parameters(text, intent_type)
+
+        # Default fallback
+        if best_intent is None or best_confidence < self.confidence_threshold:
             best_intent = IntentType.CREATE_FUNCTION
-            best_confidence = 0.3
+            best_confidence = max(0.3, best_confidence)
             best_parameters = {"description": text}
-        
-        # Detect programming language
+
         language = self._detect_language(text, context)
-        
-        return Intent(
+
+        intent = Intent(
             type=best_intent,
             confidence=best_confidence,
             parameters=best_parameters,
             original_text=text,
             language=language,
-            context=context
+            context={
+                **context,
+                "parsing_timestamp": datetime.now().isoformat(),
+                "semantic_analysis": self._analyze_semantic_content(text),
+                "complexity_score": self._calculate_complexity_score(text),
+            },
         )
+
+        # record parsing history
+        self.parsing_history.append({
+            "text": text,
+            "intent": intent.type.value,
+            "confidence": intent.confidence,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+        if len(self.parsing_history) > 100:
+            self.parsing_history = self.parsing_history[-100:]
+
+        try:
+            self.cache.set(cache_key, intent)
+        except Exception:
+            pass
+
+        try:
+            self.monitor.record_time(start_time)
+        except Exception:
+            pass
+
+        return intent
+
     
-    def _calculate_confidence(self, text: str, pattern: str, match) -> float:
-        """Calculate confidence score for a pattern match."""
+    def _calculate_confidence(self, text: str, pattern: str, match, intent_type: IntentType) -> float:
+        """Calculate confidence score for a pattern match. Uses semantic cache if available."""
+        try:
+            if hasattr(self.semantic_cache, "get"):
+                cached = self.semantic_cache.get(text, intent_type)
+                if cached is not None:
+                    return float(cached)
+        except Exception:
+            pass
+
         base_confidence = 0.7
-        
+
         # Boost confidence for exact matches
-        if match.group(0).lower() == text.lower():
-            base_confidence += 0.2
-        
+        try:
+            if match.group(0).strip().lower() == text.strip().lower():
+                base_confidence += 0.2
+        except Exception:
+            pass
+
         # Boost confidence for longer matches
-        match_length = len(match.group(0))
-        text_length = len(text)
-        if match_length / text_length > 0.8:
-            base_confidence += 0.1
-        
-        return min(base_confidence, 1.0)
+        try:
+            match_length = len(match.group(0))
+            text_length = len(text)
+            if text_length > 0 and (match_length / text_length) > 0.8:
+                base_confidence += 0.1
+        except Exception:
+            pass
+
+        score = min(base_confidence, 1.0)
+
+        try:
+            if hasattr(self.semantic_cache, "set"):
+                self.semantic_cache.set(text, intent_type, score)
+        except Exception:
+            pass
+
+        return score
     
     def _extract_parameters(self, match, intent_type: IntentType) -> Dict[str, str]:
         """Extract parameters from regex match."""
@@ -272,15 +366,23 @@ class IntentParser:
     
     def _calculate_semantic_confidence(self, text: str, intent_type: IntentType) -> float:
         """Calculate confidence based on semantic analysis."""
+        # Use cache if available
+        try:
+            cached = self.semantic_cache.get(text, intent_type)
+            if cached is not None:
+                return float(cached)
+        except Exception:
+            cached = None
+
         text_lower = text.lower()
         base_confidence = 0.5
-        
+
         # Check for semantic patterns
         for category, patterns in self.semantic_patterns.items():
             matches = sum(1 for pattern in patterns if pattern in text_lower)
             if matches > 0:
                 base_confidence += min(matches * 0.1, 0.3)
-        
+
         # Boost confidence for specific intent patterns
         if intent_type == IntentType.CREATE_FUNCTION:
             if any(word in text_lower for word in ["function", "def", "method"]):
@@ -291,8 +393,15 @@ class IntentParser:
         elif intent_type == IntentType.MODIFY_CODE:
             if any(word in text_lower for word in ["modify", "change", "update", "edit"]):
                 base_confidence += 0.2
-        
-        return min(base_confidence, 1.0)
+
+        score = min(base_confidence, 1.0)
+
+        try:
+            self.semantic_cache.set(text, intent_type, score)
+        except Exception:
+            pass
+
+        return score
     
     def _extract_advanced_parameters(self, text: str, intent_type: IntentType) -> Dict[str, Any]:
         """Extract advanced parameters using NLP techniques."""
