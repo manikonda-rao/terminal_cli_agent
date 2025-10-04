@@ -63,8 +63,7 @@ class TerminalCLI:
         # Display project status
         status = self.agent.get_project_status()
         ui.info(f"Project Root: {status['project_root']}")
-        total_turns = status['conversation_stats']['total_turns']
-        ui.info(f"Session Interactions: {total_turns}")
+        ui.info(f"Active Files: {len(status['active_files'])}")
         self.console.print()
     
     def run(self):

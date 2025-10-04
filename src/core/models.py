@@ -130,12 +130,10 @@ class AgentConfig(BaseModel):
     # Project Configuration
     backup_enabled: bool = True
     auto_save: bool = True
-    max_conversation_history: int = 50
     
     # CLI Configuration
     enable_syntax_highlighting: bool = True
     enable_autocomplete: bool = True
-    history_size: int = 1000
     
     # Security Configuration
     security_policy_file: Optional[str] = None

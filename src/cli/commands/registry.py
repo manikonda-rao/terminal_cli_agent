@@ -1,8 +1,6 @@
-from .clear_command import ClearCommand
 from .export_command import ExportCommand
 from .help_command import HelpCommand
 from .quit_command import QuitCommand
-from .rollback_command import RollbackCommand
 from .status_command import StatusCommand
 
 class CommandRegistry:
@@ -12,7 +10,7 @@ class CommandRegistry:
         self.commands = {
             cmd.name : cmd for cmd in [
                 HelpCommand(cli, console), QuitCommand(cli, console), ExportCommand(cli, console),
-                RollbackCommand(cli, console), StatusCommand(cli, console), ClearCommand(cli, console)
+                StatusCommand(cli, console)
             ]
         }
 

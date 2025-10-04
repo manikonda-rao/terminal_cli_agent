@@ -39,8 +39,6 @@ class HelpCommand(BaseCommand):
         Special Commands:
         • /help - Show this help
         • /status - Show project status
-        • /rollback - Rollback last operation
-        • /clear - Clear project
         • /export [path] - Export project
         • /quit - Exit the agent
 

@@ -252,7 +252,6 @@ class UIManager:
     
     def display_project_status(self, status: Dict[str, Any]):
         """Display project status in a structured table."""
-        stats = status.get("conversation_stats", {})
         
         # Create main status table
         table = Table(title="Project Status", box=box.ROUNDED)
@@ -261,16 +260,6 @@ class UIManager:
         
         table.add_row("Project Root", status.get("project_root", "unknown"))
         table.add_row("Active Files", str(len(status.get("active_files", []))))
-        table.add_row("Total Interactions", str(stats.get("total_turns", 0)))
-        successful_count = str(stats.get("successful_turns", 0))
-        table.add_row("Successful Operations", successful_count)
-        table.add_row("Failed Operations", str(stats.get("failed_turns", 0)))
-        
-        # Calculate success rate
-        total = stats.get("total_turns", 0)
-        successful = stats.get("successful_turns", 0)
-        success_rate = (successful / total * 100) if total > 0 else 0
-        table.add_row("Success Rate", f"{success_rate:.1f}%")
         
         self.console.print(table)
         
@@ -284,14 +273,6 @@ class UIManager:
                 remaining_count = len(active_files) - 5
                 more_files_msg = f"  ... and {remaining_count} more files"
                 self.console.print(more_files_msg)
-        
-        # Show intent statistics
-        intent_counts = stats.get("intent_counts", {})
-        if intent_counts:
-            stats_header = "\n[bold cyan]Operation Statistics:[/bold cyan]"
-            self.console.print(stats_header)
-            for intent_type, count in intent_counts.items():
-                self.console.print(f"  • {intent_type}: {count}")
     
     def display_search_results(self, results: Dict[str, List[str]],
                                query: str):
