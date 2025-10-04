@@ -13,6 +13,8 @@ from enum import Enum
 from openai import OpenAI, AsyncOpenAI
 from anthropic import Anthropic, AsyncAnthropic
 from .models import Intent, CodeBlock, CodeLanguage, AgentConfig
+from .prompt_manager import PromptTemplateManager
+
 
 
 class LLMProvider(str, Enum):
@@ -59,25 +61,25 @@ class ProviderConfig:
     rate_limit_delay: float = 1.0
     enabled: bool = True
 
-
 class CodeGenerator:
-    """Enterprise-grade code generation engine with multi-provider LLM integration framework."""
-    
     def __init__(self, config: AgentConfig):
         self.config = config
-        self.providers = {}
-        self.provider_configs = {}
-        self.generation_history = []
-        self.rate_limit_tracker = {}
+        self.prompt_manager = PromptTemplateManager()
         
         # Initialize provider configurations
-        self._initialize_providers()
+        self.provider_configs = {}
+        self.providers = {}
+        self.rate_limit_tracker = {}
+        self.generation_history = []
+        
+        # Load environment variables
+        self._load_provider_configs()
         
         # Initialize clients
         self._initialize_clients()
-    
-    def _initialize_providers(self):
-        """Initialize provider configurations."""
+
+    def _load_provider_configs(self):
+        """Load provider configurations from environment variables."""
         # OpenAI configuration
         openai_key = os.getenv("OPENAI_API_KEY")
         if openai_key:
@@ -119,7 +121,7 @@ class CodeGenerator:
             )
     
     def _initialize_clients(self):
-        """Initialize LLM clients."""
+        """Initialize LLM clients with improved error handling."""
         # OpenAI client
         if LLMProvider.OPENAI in self.provider_configs:
             try:
@@ -130,6 +132,9 @@ class CodeGenerator:
                 print(f"✓ OpenAI client initialized")
             except Exception as e:
                 print(f"✗ Failed to initialize OpenAI client: {e}")
+                # Disable the provider if initialization fails
+                if LLMProvider.OPENAI in self.provider_configs:
+                    self.provider_configs[LLMProvider.OPENAI].enabled = False
         
         # Anthropic client
         if LLMProvider.ANTHROPIC in self.provider_configs:
@@ -141,6 +146,22 @@ class CodeGenerator:
                 print(f"✓ Anthropic client initialized")
             except Exception as e:
                 print(f"✗ Failed to initialize Anthropic client: {e}")
+                # Disable the provider if initialization fails
+                if LLMProvider.ANTHROPIC in self.provider_configs:
+                    self.provider_configs[LLMProvider.ANTHROPIC].enabled = False
+    
+    def get_provider_status(self) -> Dict[str, Any]:
+        """Get status of all configured providers."""
+        status = {}
+        for provider, config in self.provider_configs.items():
+            status[provider.value] = {
+                "configured": True,
+                "enabled": config.enabled,
+                "client_initialized": provider in self.providers,
+                "model": config.model,
+                "available": config.enabled and provider in self.providers
+            }
+        return status
     
     def _get_primary_provider(self) -> Optional[LLMProvider]:
         """Get the primary provider based on configuration."""
@@ -223,9 +244,40 @@ class CodeGenerator:
         return self._fallback_to_mock(prompt, intent)
     
     def _try_provider(self, provider: LLMProvider, prompt: str, intent: Intent) -> GenerationResult:
-        """Try to generate code using a specific provider."""
+        """Try to generate code using a specific provider with improved error handling."""
         start_time = time.time()
+        
+        # Check if provider is available and enabled
+        if provider not in self.provider_configs:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} not configured"
+            )
+        
         config = self.provider_configs[provider]
+        
+        # Check if provider is enabled
+        if not config.enabled:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} is disabled"
+            )
+        
+        # Check if provider client is available
+        if provider not in self.providers:
+            return GenerationResult(
+                status=GenerationStatus.FAILED,
+                code_blocks=[],
+                provider_used=provider,
+                generation_time=time.time() - start_time,
+                error_message=f"Provider {provider} client not initialized"
+            )
         
         # Check rate limits
         if self._is_rate_limited(provider):
@@ -257,6 +309,8 @@ class CodeGenerator:
             )
             
         except Exception as e:
+            # Log the error for debugging
+            print(f"Error with {provider} provider: {e}")
             return GenerationResult(
                 status=GenerationStatus.FAILED,
                 code_blocks=[],
@@ -309,75 +363,23 @@ class CodeGenerator:
             )
     
     def _build_prompt(self, intent: Intent, context: Dict) -> str:
-        """Build prompt for LLM based on intent and context."""
-        base_prompt = f"""You are an expert software developer. Generate clean, well-documented code based on the following request:
-
-Request: {intent.original_text}
-Intent Type: {intent.type.value}
-Language: {intent.language.value if intent.language else 'python'}
-Confidence: {intent.confidence}
-
-Parameters: {json.dumps(intent.parameters, indent=2)}
-
-Context: {json.dumps(context, indent=2)}
-
-Please generate code that:
-1. Is syntactically correct and follows best practices
-2. Includes appropriate comments and documentation
-3. Handles edge cases appropriately
-4. Is ready to run/test
-
-"""
+        """Builds a prompt using the template manager instead of hardcoding."""
+        template_name = intent.type.value  # e.g. "create_function"
         
-        # Add specific instructions based on intent type
-        if intent.type.value == "create_function":
-            base_prompt += f"""
-Generate a Python function that {intent.parameters.get('description', 'performs the requested operation')}.
-- Include proper type hints
-- Add docstring with description, parameters, and return value
-- Handle common edge cases
-- Use descriptive variable names
-"""
+        # Prepare variables for template rendering
+        variables = {
+            "intent": intent,
+            "context": context,
+            "original_text": intent.original_text,
+            "parameters": intent.parameters,
+            "language": intent.language.value if intent.language else "python"
+        }
         
-        elif intent.type.value == "create_class":
-            base_prompt += f"""
-Generate a Python class that {intent.parameters.get('description', 'implements the requested functionality')}.
-- Include proper class structure with __init__ method
-- Add docstrings for the class and methods
-- Include appropriate methods and properties
-- Follow Python naming conventions
-"""
-        
-        elif intent.type.value == "modify_code":
-            base_prompt += f"""
-Modify the existing code to {intent.parameters.get('description', 'implement the requested changes')}.
-- Preserve existing functionality where possible
-- Make minimal, focused changes
-- Update comments and documentation as needed
-- Ensure the modified code is still syntactically correct
-"""
-        
-        elif intent.type.value == "run_code":
-            base_prompt += f"""
-Generate code to test/run the existing function with the following test data: {intent.parameters.get('test_data', 'default test cases')}.
-- Include test cases that cover normal and edge cases
-- Add print statements to show results
-- Handle any potential errors gracefully
-"""
-        
-        base_prompt += "\n\nGenerate only the code, no explanations or markdown formatting."
-        
-        return base_prompt
-    
-    def _call_llm(self, prompt: str) -> str:
-        """Call the configured LLM to generate code."""
-        if self.config.llm_provider == "openai" and self.openai_client:
-            return self._call_openai(prompt)
-        elif self.config.llm_provider == "anthropic" and self.anthropic_client:
-            return self._call_anthropic(prompt)
-        else:
-            # Fallback to mock generation for testing
-            return self._mock_generate(prompt)
+        try:
+            return self.prompt_manager.render_for_intent(template_name, variables)
+        except FileNotFoundError:
+            # Fallback to base template
+            return self.prompt_manager.render("base", variables)
     
     def _call_openai(self, prompt: str, config: ProviderConfig) -> str:
         """Call OpenAI API to generate code with enhanced error handling."""
@@ -396,8 +398,9 @@ Generate code to test/run the existing function with the following test data: {i
             )
             return response.choices[0].message.content
         except Exception as e:
-            print(f"OpenAI API error: {e}")
-            raise e
+            error_msg = f"OpenAI API error: {type(e).__name__}: {e}"
+            print(error_msg)
+            raise Exception(error_msg)
     
     def _call_anthropic(self, prompt: str, config: ProviderConfig) -> str:
         """Call Anthropic API to generate code with enhanced error handling."""
@@ -414,8 +417,9 @@ Generate code to test/run the existing function with the following test data: {i
             )
             return response.content[0].text
         except Exception as e:
-            print(f"Anthropic API error: {e}")
-            raise e
+            error_msg = f"Anthropic API error: {type(e).__name__}: {e}"
+            print(error_msg)
+            raise Exception(error_msg)
     
     def _mock_generate(self, prompt: str) -> str:
         """Mock code generation for testing when no API keys are available."""

@@ -1,0 +1,13 @@
+inherits: base
+version: 1
+name: create_class
+template: |
+  {{ super }}
+
+  Generate a {{ language }} class that {{ description }}.
+  - Include proper class structure with __init__ (or constructor)
+  - Add docstrings for the class and each method
+  - Include appropriate methods and properties
+  - Follow naming and style conventions for {{ language }}
+
+  Generate only the code. Do not include explanations or markdown.

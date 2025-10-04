@@ -2,6 +2,9 @@
 
 A production-ready command-line interface that transforms natural language instructions into executable code through advanced AI integration. Engineered for professional development workflows with enterprise-grade reliability and security.
 
+<img width="685" height="254" alt="Screenshot 2025-10-02 at 3 42 05 PM" src="https://github.com/user-attachments/assets/d01dae83-a8e4-4c68-a297-1c7006cd87c9" />
+
+
 ## Core Capabilities
 
 - **Advanced Intent Recognition**: Sophisticated natural language processing engine that accurately interprets developer requirements and translates them into actionable code generation tasks

@@ -1,0 +1,13 @@
+inherits: base
+version: 1
+name: modify_code
+template: |
+  {{ super }}
+
+  Modify the existing code to {{ description }}.
+  - Preserve existing functionality where possible
+  - Make minimal, focused changes
+  - Update comments and documentation as needed
+  - Ensure modified code is syntactically correct and ready to run/test
+
+  Return only the updated code (full file or relevant block).

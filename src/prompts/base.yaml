@@ -1,0 +1,22 @@
+version: 1
+name: base
+template: |
+  You are an expert software developer. Generate clean, well-documented code based on the following request:
+
+  Request: {{ request }}
+  Intent Type: {{ intent_type }}
+  Language: {{ language }}
+  Confidence: {{ confidence }}
+
+  Parameters: {{ parameters }}
+
+  Context: {{ context }}
+
+  Please generate code that:
+  1. Is syntactically correct and follows best practices
+  2. Includes appropriate comments and documentation
+  3. Handles edge cases appropriately
+  4. Is ready to run/test
+
+  {{ super }}
+

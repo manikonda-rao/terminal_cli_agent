@@ -11,6 +11,7 @@ import signal
 from typing import Optional, Dict, Any
 from pathlib import Path
 from ..core.models import CodeBlock, ExecutionResult, ExecutionStatus, AgentConfig
+from ..analysis.code_analyzer import StaticCodeAnalyzer
 
 
 class SandboxExecutor:
@@ -20,10 +21,12 @@ class SandboxExecutor:
         self.config = config
         self.temp_dir = None
         self.active_processes = {}
+        self.code_analyzer = StaticCodeAnalyzer()
+        self.execution_history = []
     
     def execute_code(self, code_block: CodeBlock, timeout: Optional[int] = None) -> ExecutionResult:
         """
-        Execute code in a sandboxed environment.
+        Execute code in a sandboxed environment with enhanced security.
         
         Args:
             code_block: Code to execute
@@ -34,6 +37,15 @@ class SandboxExecutor:
         """
         timeout = timeout or self.config.max_execution_time
         
+        # Pre-execution security analysis
+        analysis_result = self.code_analyzer.analyze_code(code_block)
+        if not analysis_result.is_safe:
+            return ExecutionResult(
+                status=ExecutionStatus.FAILED,
+                stderr=f"Code analysis failed: {analysis_result.summary}",
+                error_message="Code failed security analysis"
+            )
+        
         # Create temporary directory for execution
         self.temp_dir = tempfile.mkdtemp(prefix="coding_agent_")
         
@@ -43,6 +55,9 @@ class SandboxExecutor:
             
             # Execute the code
             result = self._run_code(file_path, timeout)
+            
+            # Log execution
+            self._log_execution(code_block, result, analysis_result)
             
             return result
             
@@ -99,6 +114,10 @@ class SandboxExecutor:
             # Track the process
             self.active_processes[process.pid] = process
             
+            # Monitor memory usage during execution
+            memory_usage = 0.0
+            max_memory_usage = 0.0
+            
             # Wait for completion with timeout
             try:
                 stdout, stderr = process.communicate(timeout=timeout)
@@ -116,11 +135,20 @@ class SandboxExecutor:
                     stderr=stderr,
                     return_code=return_code,
                     execution_time=time.time() - start_time,
+                    memory_used=max_memory_usage,
                     error_message=f"Execution timed out after {timeout} seconds"
                 )
             
             # Calculate execution time and memory usage
             execution_time = time.time() - start_time
+            
+            # Get final memory usage
+            try:
+                if process.pid in self.active_processes:
+                    process_info = psutil.Process(process.pid)
+                    memory_usage = process_info.memory_info().rss / 1024 / 1024  # Convert to MB
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                memory_usage = 0.0
             
             # Determine status based on return code
             if return_code == 0:
@@ -134,7 +162,7 @@ class SandboxExecutor:
                 stderr=stderr,
                 return_code=return_code,
                 execution_time=execution_time,
-                memory_used=0.0,  # TODO: Implement memory tracking
+                memory_used=memory_usage,
                 error_message=None if return_code == 0 else f"Process exited with code {return_code}"
             )
             
@@ -216,9 +244,48 @@ class SandboxExecutor:
         self.temp_dir = None
         self.active_processes.clear()
     
-    def __del__(self):
-        """Cleanup on destruction."""
-        self._cleanup()
+    def _log_execution(self, code_block: CodeBlock, result: ExecutionResult, analysis_result):
+        """Log execution details for monitoring."""
+        self.execution_history.append({
+            "timestamp": time.time(),
+            "language": code_block.language.value,
+            "status": result.status.value,
+            "execution_time": result.execution_time,
+            "return_code": result.return_code,
+            "analysis_score": analysis_result.score,
+            "security_score": analysis_result.security_score,
+            "stdout_length": len(result.stdout),
+            "stderr_length": len(result.stderr)
+        })
+        
+        # Keep only recent history
+        if len(self.execution_history) > 100:
+            self.execution_history = self.execution_history[-100:]
+    
+    def get_execution_statistics(self) -> Dict[str, Any]:
+        """Get execution statistics."""
+        if not self.execution_history:
+            return {"total_executions": 0}
+        
+        total_executions = len(self.execution_history)
+        successful_executions = sum(1 for e in self.execution_history if e["status"] == "completed")
+        avg_execution_time = sum(e["execution_time"] for e in self.execution_history) / total_executions
+        avg_security_score = sum(e["security_score"] for e in self.execution_history) / total_executions
+        
+        # Language distribution
+        language_counts = {}
+        for execution in self.execution_history:
+            lang = execution["language"]
+            language_counts[lang] = language_counts.get(lang, 0) + 1
+        
+        return {
+            "total_executions": total_executions,
+            "successful_executions": successful_executions,
+            "success_rate": successful_executions / total_executions if total_executions > 0 else 0,
+            "average_execution_time": avg_execution_time,
+            "average_security_score": avg_security_score,
+            "language_distribution": language_counts
+        }
 
 
 class DockerExecutor(SandboxExecutor):
@@ -228,20 +295,41 @@ class DockerExecutor(SandboxExecutor):
         super().__init__(config)
         self.docker_image = "python:3.11-slim"
         self.container_name = f"coding_agent_{os.getpid()}"
+        self.security_policy = self._create_security_policy()
+    
+    def _create_security_policy(self) -> Dict[str, Any]:
+        """Create Docker security policy."""
+        return {
+            "read_only": True,
+            "no_new_privileges": True,
+            "user": "nobody",
+            "memory_limit": f"{self.config.max_memory_mb}m",
+            "cpu_limit": "1",
+            "network_disabled": True,
+            "cap_drop": ["ALL"],
+            "security_opt": ["no-new-privileges:true"],
+            "tmpfs": {
+                "/tmp": "rw,size=100m,noexec,nosuid,nodev"
+            }
+        }
     
     def _run_code(self, file_path: str, timeout: int) -> ExecutionResult:
-        """Run code in Docker container."""
+        """Run code in Docker container with enhanced security."""
         start_time = time.time()
         
         try:
-            # Copy file to container and execute
+            # Build Docker command with security constraints
             cmd = [
                 'docker', 'run', '--rm',
-                '--memory', f'{self.config.max_memory_mb}m',
-                '--cpus', '1',
-                '--network', 'none',  # No network access
-                '--read-only',  # Read-only filesystem
-                '-v', f'{self.temp_dir}:/workspace',
+                '--memory', self.security_policy["memory_limit"],
+                '--cpus', self.security_policy["cpu_limit"],
+                '--network', 'none',
+                '--read-only',
+                '--user', self.security_policy["user"],
+                '--cap-drop', ','.join(self.security_policy["cap_drop"]),
+                '--security-opt', ','.join(self.security_policy["security_opt"]),
+                '--tmpfs', ','.join([f"{k}:{v}" for k, v in self.security_policy["tmpfs"].items()]),
+                '-v', f'{self.temp_dir}:/workspace:ro',
                 '-w', '/workspace',
                 self.docker_image,
                 'python', os.path.basename(file_path)
@@ -251,7 +339,8 @@ class DockerExecutor(SandboxExecutor):
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                preexec_fn=os.setsid if os.name != 'nt' else None
             )
             
             try:
