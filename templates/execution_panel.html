@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Code Execution Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/execution_panel.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/perl/perl.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🚀 Interactive Code Execution Panel</h1>
+                <div class="header-controls">
+                    <select id="language-selector" class="language-selector">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="rust">Rust</option>
+                        <option value="go">Go</option>
+                        <option value="php">PHP</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="perl">Perl</option>
+                        <option value="bash">Bash</option>
+                    </select>
+                    <button id="theme-toggle" class="theme-toggle" title="Toggle Theme">
+                        🌙
+                    </button>
+                    <div class="status-indicator" id="status-indicator">
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Code Editor Panel -->
+            <div class="panel code-panel">
+                <div class="panel-header">
+                    <h3>Code Editor</h3>
+                    <div class="panel-controls">
+                        <button id="run-button" class="btn btn-primary" title="Run Code (Ctrl+Enter)">
+                            ▶️ Run
+                        </button>
+                        <button id="stop-button" class="btn btn-danger" title="Stop Execution (Ctrl+C)" disabled>
+                            ⏹️ Stop
+                        </button>
+                        <button id="clear-button" class="btn btn-secondary" title="Clear Output (Ctrl+L)">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <textarea id="code-editor" placeholder="# Enter your code here...
+# Press Ctrl+Enter to run
+# Press Ctrl+L to clear output
+
+print('Hello, World!')"></textarea>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="panel output-panel">
+                <div class="panel-header">
+                    <h3>Output</h3>
+                    <div class="panel-controls">
+                        <button id="toggle-panel" class="btn btn-secondary" title="Toggle Panel Size">
+                            📏 Resize
+                        </button>
+                        <button id="copy-output" class="btn btn-secondary" title="Copy Output">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="output-content" class="output-content">
+                        <div class="output-placeholder">
+                            Output will appear here when you run code...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- History Panel -->
+        <aside class="history-panel" id="history-panel">
+            <div class="panel-header">
+                <h3>Execution History</h3>
+                <div class="panel-controls">
+                    <button id="clear-history" class="btn btn-secondary" title="Clear History">
+                        🗑️ Clear
+                    </button>
+                    <button id="toggle-history" class="btn btn-secondary" title="Toggle History Panel">
+                        📜 Toggle
+                    </button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="history-content" class="history-content">
+                    <div class="history-placeholder">
+                        No execution history yet...
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="shortcuts">
+                    <span class="shortcut">Ctrl+Enter: Run</span>
+                    <span class="shortcut">Ctrl+C: Stop</span>
+                    <span class="shortcut">Ctrl+L: Clear</span>
+                    <span class="shortcut">Ctrl+Shift+T: Theme</span>
+                </div>
+                <div class="session-info">
+                    <span id="session-id">Session: Connecting...</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Executing code...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/execution_panel.js') }}"></script>
+</body>
+</html>

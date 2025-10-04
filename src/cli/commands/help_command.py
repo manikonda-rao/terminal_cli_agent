@@ -40,6 +40,8 @@ class HelpCommand(BaseCommand):
         • /help - Show this help
         • /status - Show project status
         • /export [path] - Export project
+        • /execution-panel - Launch interactive code execution panel
+        • /web-panel - Launch web-based code execution panel
         • /quit - Exit the agent
 
         Examples:

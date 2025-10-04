@@ -2,6 +2,8 @@ from .export_command import ExportCommand
 from .help_command import HelpCommand
 from .quit_command import QuitCommand
 from .status_command import StatusCommand
+from .execution_panel_command import ExecutionPanelCommand
+from .web_execution_panel_command import WebExecutionPanelCommand
 
 class CommandRegistry:
     def __init__(self, cli, console):
@@ -10,7 +12,7 @@ class CommandRegistry:
         self.commands = {
             cmd.name : cmd for cmd in [
                 HelpCommand(cli, console), QuitCommand(cli, console), ExportCommand(cli, console),
-                StatusCommand(cli, console)
+                StatusCommand(cli, console), ExecutionPanelCommand(cli, console), WebExecutionPanelCommand(cli, console)
             ]
         }
 

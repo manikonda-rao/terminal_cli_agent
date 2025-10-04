@@ -30,16 +30,108 @@ The interface provides a streamlined, emoji-free experience with:
 - Intelligent autocompletion
 - Syntax highlighting
 
-## Core Capabilities
+## Interactive Code Execution Panel
 
-- **Advanced Intent Recognition**: Sophisticated natural language processing engine that accurately interprets developer requirements and translates them into actionable code generation tasks
-- **Intelligent Code Synthesis**: High-quality code generation powered by state-of-the-art language models with support for multiple programming languages and frameworks
-- **Secure Execution Environment**: Enterprise-grade sandboxed execution with comprehensive resource management, process isolation, and security controls
-- **Intelligent File Management**: Automated file operations with version control integration, backup systems, and rollback capabilities
-- **Contextual Memory System**: Persistent conversation state management that maintains project context and development history across sessions
-- **Professional CLI Interface**: Feature-rich terminal interface with syntax highlighting, intelligent autocompletion, and real-time progress monitoring
-- **Integrated Version Control**: Seamless Git integration with automated commit management and branch operations
-- **Project State Persistence**: Comprehensive project state tracking with conversation history and development context preservation
+The Terminal Coding Agent now includes a powerful interactive code execution panel that allows you to run code snippets directly within the interface with real-time output display.
+
+### Features
+
+- **Multi-Language Support**: Execute code in Python, JavaScript, TypeScript, Java, C++, Rust, Go, PHP, Ruby, Perl, and Bash
+- **Real-Time Output**: See console output, logs, and errors as they happen
+- **Secure Execution**: All code runs in sandboxed environments with resource limits
+- **Execution History**: Maintain a history of executed commands with timestamps
+- **Theme Support**: Toggle between light and dark themes for better readability
+- **Keyboard Shortcuts**: Quick execution with Ctrl+Enter, stop with Ctrl+C, clear with Ctrl+L
+- **Responsive Design**: Collapsible panels and resizable interface elements
+
+### Two Interface Options
+
+#### 1. Terminal-Based Panel (`/execution-panel`)
+A rich terminal interface using the Rich library for beautiful formatting:
+
+```bash
+# Launch the terminal execution panel
+/execution-panel
+```
+
+Features:
+- Rich terminal UI with syntax highlighting
+- Real-time output streaming
+- Interactive command interface
+- Execution history with timestamps
+- Theme switching (light/dark)
+
+#### 2. Web-Based Panel (`/web-panel`)
+A modern web interface accessible through your browser:
+
+```bash
+# Launch the web execution panel
+/web-panel
+```
+
+Features:
+- Modern web UI with CodeMirror editor
+- Real-time WebSocket communication
+- Responsive design for desktop and mobile
+- Copy/paste functionality
+- Toast notifications
+- Loading indicators
+- Collapsible panels
+
+### Usage Examples
+
+```bash
+# Terminal panel
+/execution-panel
+
+# Web panel (default: localhost:5000)
+/web-panel
+
+# Web panel on custom host/port
+/web-panel 0.0.0.0 8080
+```
+
+### Supported Languages
+
+The execution panel supports multiple programming languages with proper syntax highlighting and execution:
+
+- **Python**: Full Python 3.x support with standard library
+- **JavaScript**: Node.js runtime with ES6+ features
+- **TypeScript**: Compiled to JavaScript before execution
+- **Java**: Full Java compilation and execution
+- **C++**: GCC compilation and execution
+- **Rust**: Rustc compilation and execution
+- **Go**: Go runtime execution
+- **PHP**: PHP interpreter execution
+- **Ruby**: Ruby interpreter execution
+- **Perl**: Perl interpreter execution
+- **Bash**: Shell script execution
+
+### Security Features
+
+- **Sandboxed Execution**: All code runs in isolated environments
+- **Resource Limits**: Memory and CPU usage limits prevent system overload
+- **Timeout Protection**: Automatic termination of long-running processes
+- **Security Scanning**: Code analysis for potentially dangerous operations
+- **Process Isolation**: Complete separation from the host system
+
+### Keyboard Shortcuts
+
+- `Ctrl+Enter`: Run current code
+- `Ctrl+C`: Stop execution
+- `Ctrl+L`: Clear output
+- `Ctrl+Shift+T`: Toggle theme
+- `Ctrl+Shift+E`: Toggle panel size (web panel)
+
+### Demo
+
+Try the interactive demo to see the execution panel in action:
+
+```bash
+python demo_execution_panel.py
+```
+
+This will launch an interactive demo showing both terminal and web-based execution panels with sample code in multiple languages.
 
 ## Architecture
 
