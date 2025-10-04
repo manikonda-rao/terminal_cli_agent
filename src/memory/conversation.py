@@ -167,6 +167,8 @@ class ConversationMemory:
     def export_memory(self, filepath: str):
         """Export conversation memory to a file."""
         try:
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
             data = {
                 "conversation_history": [turn.model_dump() for turn in self.conversation_history],
                 "project_context": self.project_context,

@@ -11,6 +11,8 @@ from prompt_toolkit.completion import WordCompleter
 
 from ..core.agent import CodingAgent
 from ..core.models import AgentConfig
+
+from .commands import CommandRegistry
 from ..core.ui import ui
 
 
@@ -43,6 +45,8 @@ class TerminalCLI:
         ])
         
         self._show_welcome()
+
+        self.command_registry = CommandRegistry(self, self.console)
     
     def _show_welcome(self):
         """Show welcome message using new UI."""
@@ -76,7 +80,9 @@ class TerminalCLI:
                 
                 # Handle special commands
                 if user_input.startswith("/"):
-                    self._handle_special_command(user_input)
+                    self.command_registry.get_command(user_input)
+
+                    # self._handle_special_command(user_input)
                     continue
                 
                 # Process the input with loading indicator
@@ -95,53 +101,6 @@ class TerminalCLI:
             except Exception as e:
                 ui.show_clean_error(e, "CLI processing error")
     
-    def _handle_special_command(self, command: str):
-        """Handle special CLI commands."""
-        parts = command.split()
-        cmd = parts[0].lower()
-        
-        if cmd == "/help":
-            ui.show_help()
-        
-        elif cmd == "/status":
-            self._show_status()
-        
-        elif cmd == "/rollback":
-            ui.step("Attempting to rollback last operation...")
-            success = self.agent.rollback_last_operation()
-            if success:
-                ui.success("Operation rollback completed successfully")
-            else:
-                ui.error("Rollback operation failed")
-        
-        elif cmd == "/clear":
-            changes_summary = ("This will reset all project state and "
-                               "conversation history.")
-            if ui.confirm_changes(changes_summary):
-                self.agent.clear_project()
-                ui.success("Project state reset completed")
-        
-        elif cmd == "/export":
-            if len(parts) > 1:
-                export_path = parts[1]
-                ui.step(f"Exporting project to {export_path}...")
-                self.agent.export_project(export_path)
-                ui.success(f"Project exported to {export_path}")
-            else:
-                ui.error("Export path required: /export <path>")
-        
-        elif cmd == "/quit":
-            ui.info("Terminal Coding Agent session ended.")
-            self.running = False
-        
-        else:
-            ui.error(f"Invalid command: {cmd}")
-            ui.info("Use /help to view available commands")
-    
-    def _show_status(self):
-        """Show detailed project status using new UI."""
-        status = self.agent.get_project_status()
-        ui.display_project_status(status)
     
     def _display_turn_results(self, turn):
         """Display conversation turn results with new UI formatting."""
