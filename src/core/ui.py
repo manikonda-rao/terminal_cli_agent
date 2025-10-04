@@ -15,6 +15,7 @@ from rich.prompt import Confirm
 from rich.status import Status
 from rich.align import Align
 from rich import box
+from .streaming import streaming_response, interactive_prompt, smart_completer
 
 
 class UIManager:
@@ -54,79 +55,81 @@ class UIManager:
     
     def success(self, message: str):
         """Display success message in green."""
-        self.console.print(f"✅ [green]{message}[/green]")
+        self.console.print(f"[green]{message}[/green]")
     
     def warning(self, message: str):
         """Display warning message in yellow."""
-        self.console.print(f"⚠️  [yellow]{message}[/yellow]")
+        self.console.print(f"[yellow]{message}[/yellow]")
     
     def error(self, message: str):
         """Display error message in red."""
-        self.console.print(f"❌ [red]{message}[/red]")
+        self.console.print(f"[red]{message}[/red]")
     
     def info(self, message: str):
         """Display informational message in blue/cyan."""
-        self.console.print(f"ℹ️  [cyan]{message}[/cyan]")
+        self.console.print(f"[cyan]{message}[/cyan]")
     
     def step(self, message: str):
-        """Display step information with icon."""
-        self.console.print(f"🔄 [blue]{message}[/blue]")
+        """Display step information."""
+        self.console.print(f"[blue]{message}[/blue]")
     
     def show_code_preview(self, code: str, language: str = "python",
-                          title: str = "Generated Code"):
-        """Display code in a highlighted block."""
-        syntax = Syntax(
-            code,
-            language,
-            theme="monokai",
-            line_numbers=True,
-            background_color="default"
-        )
-        
-        code_panel = Panel(
-            syntax,
-            title=f"📝 {title}",
-            border_style="green",
-            expand=False
-        )
-        
-        self.console.print(code_panel)
+                          title: str = "Generated Code", stream: bool = True):
+        """Display code in a highlighted block with optional streaming."""
+        if stream:
+            streaming_response.stream_code(code, language, title)
+        else:
+            syntax = Syntax(
+                code,
+                language,
+                theme="monokai",
+                line_numbers=True,
+                background_color="default"
+            )
+            
+            code_panel = Panel(
+                syntax,
+                title=title,
+                border_style="green",
+                expand=False
+            )
+            
+            self.console.print(code_panel)
     
-    def show_direct_response(self, response: str, title: str = "Response"):
-        """Display direct response as formatted text."""
-        response_panel = Panel(
-            response,
-            title=f"💬 {title}",
-            border_style="blue",
-            expand=False,
-            padding=(1, 2)
-        )
-        
-        self.console.print(response_panel)
+    def show_direct_response(self, response: str, title: str = "Response", stream: bool = True):
+        """Display direct response as formatted text with optional streaming."""
+        if stream:
+            streaming_response.stream_text(response, title)
+        else:
+            response_panel = Panel(
+                response,
+                title=title,
+                border_style="blue",
+                expand=False,
+                padding=(1, 2)
+            )
+            
+            self.console.print(response_panel)
     
     def show_execution_logs(self, steps: List[Dict[str, Any]]):
-        """Display step-by-step execution logs with status icons."""
+        """Display step-by-step execution logs."""
         self.console.print("[bold blue]Execution Steps:[/bold blue]")
         
         for i, step in enumerate(steps, 1):
             status = step.get('status', 'pending')
             message = step.get('message', '')
             
-            # Choose icon and color based on status
+            # Choose color based on status
             if status == 'completed':
-                icon = "✅"
                 style = "green"
             elif status == 'failed':
-                icon = "❌"
                 style = "red"
             elif status == 'in_progress':
-                icon = "🔄"
                 style = "blue"
             else:
-                icon = "⏳"
                 style = "yellow"
             
-            step_text = f"  {icon} [{style}]Step {i}: {message}[/{style}]"
+            step_text = f"  [{style}]Step {i}: {message}[/{style}]"
             self.console.print(step_text)
     
     def show_clean_error(self, error: Exception, context: str = ""):
@@ -142,7 +145,7 @@ class UIManager:
         
         error_panel = Panel(
             error_text,
-            title="❌ Error",
+            title="Error",
             border_style="red",
             expand=False
         )
@@ -151,7 +154,7 @@ class UIManager:
     
     def confirm_changes(self, changes_summary: str) -> bool:
         """Ask user for confirmation before applying changes."""
-        self.console.print("\n[yellow]📋 Changes Summary:[/yellow]")
+        self.console.print("\n[yellow]Changes Summary:[/yellow]")
         self.console.print(changes_summary)
         self.console.print()
         
@@ -162,7 +165,7 @@ class UIManager:
     
     def show_loading(self, message: str = "Processing..."):
         """Show a loading spinner with message."""
-        return Status(f"🔄 {message}", console=self.console, spinner="dots")
+        return Status(message, console=self.console, spinner="dots")
     
     def show_progress_bar(self, tasks: List[str]):
         """Show progress bar for multiple tasks."""
@@ -186,31 +189,26 @@ class UIManager:
         if not operations:
             return
         
-        self.console.print("\n[bold yellow]📁 File Operations:[/bold yellow]")
+        self.console.print("\n[bold yellow]File Operations:[/bold yellow]")
         
         for op in operations:
             operation = op.get('operation', 'unknown')
             filepath = op.get('filepath', 'unknown')
             
-            # Choose icon and color based on operation
+            # Choose color based on operation
             if operation == 'create':
-                icon = "📄"
                 style = "green"
             elif operation == 'modify':
-                icon = "✏️"
                 style = "blue"
             elif operation == 'delete':
-                icon = "🗑️"
                 style = "red"
             elif operation == 'rollback':
-                icon = "↩️"
                 style = "yellow"
             else:
-                icon = "📋"
                 style = "white"
             
             operation_title = operation.title()
-            file_op_text = f"  {icon} [{style}]{operation_title}[/{style}]:"
+            file_op_text = f"  [{style}]{operation_title}[/{style}]:"
             file_op_text += f" {filepath}"
             self.console.print(file_op_text)
     
@@ -220,25 +218,25 @@ class UIManager:
         
         # Status indicator
         if status == 'completed':
-            success_msg = "\n✅ [green]Execution Completed Successfully[/green]"
+            success_msg = "\n[green]Execution Completed Successfully[/green]"
             self.console.print(success_msg)
         elif status == 'failed':
-            self.console.print("\n❌ [red]Execution Failed[/red]")
+            self.console.print("\n[red]Execution Failed[/red]")
         else:
-            status_msg = f"\n🔄 [yellow]Execution Status: {status}[/yellow]"
+            status_msg = f"\n[yellow]Execution Status: {status}[/yellow]"
             self.console.print(status_msg)
         
         # Execution time
         if 'execution_time' in result:
             exec_time = result['execution_time']
-            time_msg = f"⏱️  Execution Time: {exec_time:.3f}s"
+            time_msg = f"Execution Time: {exec_time:.3f}s"
             self.console.print(time_msg)
         
         # Output
         if result.get('stdout'):
             output_panel = Panel(
                 result['stdout'],
-                title="📤 Output",
+                title="Output",
                 border_style="green"
             )
             self.console.print(output_panel)
@@ -247,7 +245,7 @@ class UIManager:
         if result.get('stderr'):
             error_panel = Panel(
                 result['stderr'],
-                title="⚠️ Error Output",
+                title="Error Output",
                 border_style="red"
             )
             self.console.print(error_panel)
@@ -257,7 +255,7 @@ class UIManager:
         stats = status.get("conversation_stats", {})
         
         # Create main status table
-        table = Table(title="📊 Project Status", box=box.ROUNDED)
+        table = Table(title="Project Status", box=box.ROUNDED)
         table.add_column("Metric", style="cyan", no_wrap=True)
         table.add_column("Value", style="green")
         
@@ -279,9 +277,9 @@ class UIManager:
         # Show active files
         active_files = status.get("active_files", [])
         if active_files:
-            self.console.print("\n[bold cyan]📁 Recent Files:[/bold cyan]")
+            self.console.print("\n[bold cyan]Recent Files:[/bold cyan]")
             for file in active_files[-5:]:  # Show last 5 files
-                self.console.print(f"  📄 {file}")
+                self.console.print(f"  {file}")
             if len(active_files) > 5:
                 remaining_count = len(active_files) - 5
                 more_files_msg = f"  ... and {remaining_count} more files"
@@ -290,7 +288,7 @@ class UIManager:
         # Show intent statistics
         intent_counts = stats.get("intent_counts", {})
         if intent_counts:
-            stats_header = "\n[bold cyan]🎯 Operation Statistics:[/bold cyan]"
+            stats_header = "\n[bold cyan]Operation Statistics:[/bold cyan]"
             self.console.print(stats_header)
             for intent_type, count in intent_counts.items():
                 self.console.print(f"  • {intent_type}: {count}")
@@ -302,13 +300,13 @@ class UIManager:
             self.warning(f"No results found for '{query}'")
             return
         
-        search_prefix = "\n[bold green]🔍 Search Results for"
+        search_prefix = "\n[bold green]Search Results for"
         search_title = f"{search_prefix} '{query}':[/bold green]"
         self.console.print(search_title)
         
         for filepath, matches in results.items():
             # File header
-            self.console.print(f"\n📄 [bold cyan]{filepath}[/bold cyan]")
+            self.console.print(f"\n[bold cyan]{filepath}[/bold cyan]")
             
             # Show matches (limit to first 3)
             for i, match in enumerate(matches[:3], 1):
@@ -321,23 +319,45 @@ class UIManager:
                 self.console.print(more_msg)
     
     def show_welcome_banner(self, version: str = "1.0.0"):
-        """Display welcome banner with styling."""
+        """Display welcome banner with unique terminal icon."""
+        # Unique ASCII art terminal icon
+        terminal_icon = """
+    ╔══════════════════════════════════════════════════════════════╗
+    ║  ███████╗██╗   ██╗███████╗████████╗ ██████╗ ██████╗ ██╗     ║
+    ║  ██╔════╝██║   ██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██║     ║
+    ║  ███████╗██║   ██║█████╗     ██║   ██║   ██║██████╔╝██║     ║
+    ║  ╚════██║██║   ██║██╔══╝     ██║   ██║   ██║██╔══██╗██║     ║
+    ║  ███████║╚██████╔╝███████╗   ██║   ╚██████╔╝██║  ██║███████╗║
+    ║  ╚══════╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝║
+    ║                                                              ║
+    ║  AI-Powered Terminal Coding Assistant                        ║
+    ║  Generate, modify, and execute code with natural language    ║
+    ║  Safe execution in sandboxed environments                    ║
+    ║  Intelligent file management with version control           ║
+    ║  Persistent conversation context and project state          ║
+    ╚══════════════════════════════════════════════════════════════╝
+        """
+        
         welcome_text = f"""
 [bold blue]Terminal Coding Agent v{version}[/bold blue]
 
-🤖 Professional AI-powered development assistant
-🚀 Generate, modify, and execute code with natural language
-🛡️  Safe execution in sandboxed environments
-📁 Intelligent file management with version control
-🧠 Persistent conversation context and project state
-
 [dim]Enter your development requests in natural language,[/dim]
 [dim]or use /help for commands.[/dim]
+
+[bold cyan]Quick Start:[/bold cyan]
+• [green]Create a Python function for quicksort[/green]
+• [green]Modify the last function to handle edge cases[/green]
+• [green]Run the last function with test data[/green]
+• [green]Explain how the algorithm works[/green]
         """
         
+        # Display the ASCII art
+        self.console.print(terminal_icon, style="bold cyan")
+        
+        # Display welcome text
         welcome_panel = Panel(
             Align.center(welcome_text),
-            title="🎉 Welcome",
+            title="Welcome",
             border_style="blue",
             box=box.DOUBLE
         )
@@ -402,9 +422,60 @@ class UIManager:
         self.console.print()
         self.console.print(special_table)
         self.console.print()
-        examples_panel = Panel(examples_text, title="💡 Examples",
+        examples_panel = Panel(examples_text, title="Examples",
                                border_style="green")
         self.console.print(examples_panel)
+    
+    def show_smart_suggestions(self, user_input: str):
+        """Show smart suggestions based on user input."""
+        suggestions = smart_completer.get_completions(user_input)
+        if suggestions:
+            interactive_prompt.show_suggestions(suggestions, "Smart Suggestions")
+    
+    def show_typing_indicator(self, message: str = "Thinking..."):
+        """Show a typing indicator."""
+        with Status(message, console=self.console, spinner="dots") as status:
+            return status
+    
+    def show_quick_actions(self, actions: List[str]):
+        """Show quick action buttons."""
+        if not actions:
+            return
+        
+        actions_text = Text()
+        for i, action in enumerate(actions, 1):
+            actions_text.append(f"{i}. {action}\n", style="cyan")
+        
+        panel = Panel(
+            actions_text,
+            title="Quick Actions",
+            border_style="yellow",
+            expand=False,
+            padding=(1, 2)
+        )
+        
+        self.console.print(panel)
+    
+    def show_context_info(self, context: Dict[str, Any]):
+        """Show context information in a compact format."""
+        if not context:
+            return
+        
+        context_text = Text()
+        for key, value in context.items():
+            if isinstance(value, (list, dict)):
+                value = str(value)[:50] + "..." if len(str(value)) > 50 else str(value)
+            context_text.append(f"{key}: {value}\n", style="dim")
+        
+        panel = Panel(
+            context_text,
+            title="Context",
+            border_style="dim",
+            expand=False,
+            padding=(0, 1)
+        )
+        
+        self.console.print(panel)
 
 
 # Global UI manager instance

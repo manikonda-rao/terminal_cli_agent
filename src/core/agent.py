@@ -50,7 +50,7 @@ class CodingAgent:
     
     def process_input(self, user_input: str) -> ConversationTurn:
         """
-        Process user input and generate appropriate response.
+        Process user input and generate appropriate response - streamlined.
         
         Args:
             user_input: Natural language input from user
@@ -58,16 +58,9 @@ class CodingAgent:
         Returns:
             ConversationTurn with the complete interaction
         """
-        ui.step(f"Processing: {user_input}")
-        
         # Parse intent
         context = self.memory.get_recent_context()
         intent = self.intent_parser.parse(user_input, context)
-        
-        intent_type = intent.type.value
-        confidence = intent.confidence
-        confidence_info = f"Intent: {intent_type} (confidence: {confidence:.2f})"
-        ui.info(confidence_info)
         
         # Get context for this specific intent
         intent_context = self.memory.get_context_for_intent(intent)
@@ -79,16 +72,10 @@ class CodingAgent:
         success = True
         error_message = None
         
-        # Create execution steps for UI display
-        steps = []
-        
         try:
-            # For most intents, provide direct LLM response instead of generating functions
+            # For most intents, provide direct LLM response
             if intent.type in [IntentType.CREATE_FUNCTION, IntentType.CREATE_CLASS, IntentType.MODIFY_CODE, 
                               IntentType.EXPLAIN_CODE, IntentType.REFACTOR_CODE, IntentType.DEBUG_CODE]:
-                
-                steps.append({'status': 'in_progress', 'message': 'Generating response'})
-                ui.show_execution_logs(steps)
                 
                 # Get direct response from LLM
                 response_text = self._get_direct_response(user_input, intent, intent_context)
@@ -105,82 +92,37 @@ class CodingAgent:
                 )
                 code_blocks.append(response_block)
                 
-                steps[0]['status'] = 'completed'
-                steps[0]['message'] = 'Response generated successfully'
-                ui.show_execution_logs(steps)
-                
             elif intent.type == IntentType.RUN_CODE:
-                steps.append({'status': 'in_progress', 'message': 'Generating execution code'})
-                ui.show_execution_logs(steps)
-                
                 # Generate test/execution code
                 code_blocks = self.code_generator.generate_code(intent, intent_context)
-                steps[0]['status'] = 'completed'
                 
                 # Execute the code
                 for code_block in code_blocks:
-                    steps.append({'status': 'in_progress', 'message': 'Executing code'})
-                    ui.show_execution_logs(steps)
-                    
                     execution_result = self.executor.execute_code(code_block)
-                    
-                    if execution_result.status == ExecutionStatus.COMPLETED:
-                        steps[-1]['status'] = 'completed'
-                        steps[-1]['message'] = f'Execution completed: {execution_result.status.value}'
-                        if execution_result.stdout:
-                            ui.info(f"Output:\n{execution_result.stdout}")
-                    else:
-                        steps[-1]['status'] = 'failed'
-                        steps[-1]['message'] = f'Execution failed: {execution_result.error_message}'
-                        if execution_result.stderr:
-                            ui.error(f"Error details:\n{execution_result.stderr}")
-                    
-                    ui.show_execution_logs(steps)
                 
             elif intent.type == IntentType.CREATE_FILE:
                 filename = intent.parameters.get("description", "new_file.py")
                 content = "# New file created by coding agent\n"
                 
-                steps.append({'status': 'in_progress', 'message': f'Creating file: {filename}'})
-                ui.show_execution_logs(steps)
-                
                 file_op = self.file_manager.create_file(filename, content)
                 file_operations.append(file_op)
-                
-                steps[0]['status'] = 'completed'
-                ui.show_execution_logs(steps)
                 
             elif intent.type == IntentType.DELETE_FILE:
                 filename = intent.parameters.get("description", "")
                 if filename:
-                    steps.append({'status': 'in_progress', 'message': f'Deleting file: {filename}'})
-                    ui.show_execution_logs(steps)
-                    
                     file_op = self.file_manager.delete_file(filename)
                     file_operations.append(file_op)
-                    
-                    steps[0]['status'] = 'completed'
-                    ui.show_execution_logs(steps)
                 else:
                     raise ValueError("No filename specified for deletion")
                 
             elif intent.type == IntentType.SEARCH_CODE:
                 query = intent.parameters.get("description", "")
                 if query:
-                    steps.append({'status': 'in_progress', 'message': f'Searching for: {query}'})
-                    ui.show_execution_logs(steps)
-                    
                     results = self.file_manager.search_in_files(query)
-                    steps[0]['status'] = 'completed'
-                    ui.show_execution_logs(steps)
-                    
                     ui.display_search_results(results, query)
                 
             else:
                 # Default: provide direct response
-                steps.append({'status': 'in_progress', 'message': 'Generating response'})
-                ui.show_execution_logs(steps)
-                
                 response_text = self._get_direct_response(user_input, intent, intent_context)
                 
                 response_block = CodeBlock(
@@ -193,10 +135,6 @@ class CodingAgent:
                     }
                 )
                 code_blocks.append(response_block)
-                
-                steps[0]['status'] = 'completed'
-                steps[0]['message'] = 'Response generated successfully'
-                ui.show_execution_logs(steps)
                 
         except Exception as e:
             success = False

@@ -2,8 +2,33 @@
 
 A production-ready command-line interface that transforms natural language instructions into executable code through advanced AI integration. Engineered for professional development workflows with enterprise-grade reliability and security.
 
-<img width="685" height="254" alt="Screenshot 2025-10-02 at 3 42 05 PM" src="https://github.com/user-attachments/assets/d01dae83-a8e4-4c68-a297-1c7006cd87c9" />
+## Terminal Interface
 
+The CLI features a clean, professional ASCII art interface with the distinctive "SUTRO" branding:
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║  ███████╗██╗   ██╗███████╗████████╗ ██████╗ ██████╗ ██╗     ║
+║  ██╔════╝██║   ██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██║     ║
+║  ███████╗██║   ██║█████╗     ██║   ██║   ██║██████╔╝██║     ║
+║  ╚════██║██║   ██║██╔══╝     ██║   ██║   ██║██╔══██╗██║     ║
+║  ███████║╚██████╔╝███████╗   ██║   ╚██████╔╝██║  ██║███████╗║
+║  ╚══════╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝║
+║                                                              ║
+║  AI-Powered Terminal Coding Assistant                        ║
+║  Generate, modify, and execute code with natural language    ║
+║  Safe execution in sandboxed environments                    ║
+║  Intelligent file management with version control           ║
+║  Persistent conversation context and project state          ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+The interface provides a streamlined, emoji-free experience with:
+- Clean ASCII art branding
+- Professional terminal aesthetics
+- Real-time streaming responses
+- Intelligent autocompletion
+- Syntax highlighting
 
 ## Core Capabilities
 
@@ -230,4 +255,3 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed gu
 ## Roadmap
 
 For our development roadmap, future features, and strategic vision, see [ROADMAP.md](ROADMAP.md).
-
