@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from pathlib import Path
-from .models import ConversationTurn, ProjectState, Intent, AgentConfig
+from ..core.models import ConversationTurn, ProjectState, Intent, AgentConfig
 
 
 class ConversationMemory:

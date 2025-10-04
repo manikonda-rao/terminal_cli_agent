@@ -92,6 +92,18 @@ class UIManager:
         
         self.console.print(code_panel)
     
+    def show_direct_response(self, response: str, title: str = "Response"):
+        """Display direct response as formatted text."""
+        response_panel = Panel(
+            response,
+            title=f"💬 {title}",
+            border_style="blue",
+            expand=False,
+            padding=(1, 2)
+        )
+        
+        self.console.print(response_panel)
+    
     def show_execution_logs(self, steps: List[Dict[str, Any]]):
         """Display step-by-step execution logs with status icons."""
         self.console.print("[bold blue]Execution Steps:[/bold blue]")
