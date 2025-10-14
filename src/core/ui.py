@@ -304,19 +304,25 @@ class UIManager:
         # Unique ASCII art terminal icon with POGO branding and fish face
         terminal_icon = """
     ╔══════════════════════════════════════════════════════════════╗
+    ║           /\ \       /\ \         /\ \           /\ \        ║
+    ║          /  \ \     /  \ \       /  \ \         /  \ \       ║
+    ║         / /\ \ \   / /\ \ \     / /\ \_\       / /\ \ \      ║
+    ║        / / /\ \_\ / / /\ \ \   / / /\/_/      / / /\ \ \     ║
+    ║       / / /_/ / // / /  \ \_\ / / / ______   / / /  \ \_\    ║
+    ║      / / /__\/ // / /   / / // / / /\_____\ / / /   / / /    ║
+    ║     / / /_____// / /   / / // / /  \/____ // / /   / / /     ║
+    ║    / / /      / / /___/ / // / /_____/ / // / /___/ / /      ║
+    ║   / / /      / / /____\/ // / /______\/ // / /____\/ /       ║ 
+    ║   \/_/       \/_________/ \/___________/ \/_________/        ║                                               ║
     ║                                                              ║
-    ║    🐠  ██████╗  ██████╗  ██████╗  ██████╗   🐠           ║
-    ║       ██╔══██╗██╔═══██╗██╔═══██╗██╔═══██╗                  ║
-    ║       ██████╔╝██║   ██║██║   ██║██║   ██║                  ║
-    ║       ██╔═══╝ ██║   ██║██║ ██╗██║██║   ██║                  ║
-    ║       ██║     ╚██████╔╝╚██████╔╝╚██████╔╝                  ║
-    ║       ╚═╝      ╚═════╝  ╚═════╝  ╚═════╝                   ║
     ║                                                              ║
-    ║              AI-Powered Terminal Coding Assistant            ║
-    ║      Generate, modify, and execute code with natural language║
-    ║          Safe execution in sandboxed environments            ║
-    ║        Intelligent file management with version control      ║
-    ║        Persistent conversation context and project state     ║
+    ║    AI-Powered Terminal Coding Assistant                      ║
+    ║    Generate, modify, and execute code with natural language  ║
+    ║    Safe execution in sandboxed environments                  ║
+    ║    Intelligent file management with version control          ║
+    ║    Persistent conversation context and project state         ║
+    ║                                                              ║
+    ║                                                              ║
     ║                                                              ║
     ╚══════════════════════════════════════════════════════════════╝
         """
@@ -328,10 +334,10 @@ class UIManager:
 [dim]or use /help for commands.[/dim]
 
 [bold cyan]Quick Start:[/bold cyan]
-• [green]Create a Python function for quicksort[/green]
-• [green]Modify the last function to handle edge cases[/green]
-• [green]Run the last function with test data[/green]
-• [green]Explain how the algorithm works[/green]
+• [#6F00FE]Create a Python function for quicksort[/#6F00FE]
+• [#6F00FE]Modify the last function to handle edge cases[/#6F00FE]
+• [#6F00FE]Run the last function with test data[/#6F00FE]
+• [#6F00FE]Explain how the algorithm works[/#6F00FE]
         """
         
         # Display the ASCII art
