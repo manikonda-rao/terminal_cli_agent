@@ -188,7 +188,8 @@ class ExecutorFactory:
     def _is_daytona_available(self) -> bool:
         """Check if Daytona is available."""
         try:
-            import daytona_sdk
+            import importlib
+            importlib.import_module("daytona_sdk")
             return os.getenv("DAYTONA_API_KEY") is not None
         except ImportError:
             return False
@@ -196,7 +197,8 @@ class ExecutorFactory:
     def _is_e2b_available(self) -> bool:
         """Check if E2B is available."""
         try:
-            import e2b
+            import importlib
+            importlib.import_module("e2b")
             return os.getenv("E2B_API_KEY") is not None
         except ImportError:
             return False
