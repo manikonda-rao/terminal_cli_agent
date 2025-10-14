@@ -78,6 +78,16 @@ class ExecutionResult(BaseModel):
     traceback: Optional[str] = None
 
 
+class TerminalExecutionResult(ExecutionResult):
+    """Result of terminal command execution with additional terminal-specific fields."""
+    command: str = ""
+    interactive_mode: bool = False
+    security_validated: bool = True
+    process_id: Optional[int] = None
+    working_directory: Optional[str] = None
+    environment_variables: Dict[str, str] = Field(default_factory=dict)
+
+
 class FileOperation(BaseModel):
     """Represents a file operation."""
     operation: str  # create, modify, delete

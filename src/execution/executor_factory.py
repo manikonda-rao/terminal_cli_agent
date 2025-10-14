@@ -10,6 +10,7 @@ from .sandbox import SandboxExecutor, DockerExecutor
 from .e2b_executor import E2BExecutor, E2BExecutorWithSecurity
 from .daytona_executor import DaytonaExecutor, DaytonaExecutorWithSecurity
 from .multi_language_executor import MultiLanguageExecutor
+from .terminal_executor import TerminalExecutor
 
 
 class ExecutorFactory:
@@ -105,6 +106,8 @@ class ExecutorFactory:
             return self._create_docker_executor(security_policy)
         elif executor_mode == "multi":
             return self._create_multi_language_executor(security_policy)
+        elif executor_mode == "terminal":
+            return self._create_terminal_executor(security_policy)
         else:  # sandbox
             return self._create_sandbox_executor(security_policy)
     
@@ -165,6 +168,17 @@ class ExecutorFactory:
             print(f"Warning: Multi-language executor failed, falling back to sandbox: {e}")
             return self._create_sandbox_executor(security_policy)
     
+    def _create_terminal_executor(self, security_policy) -> Any:
+        """Create terminal executor with security policy."""
+        try:
+            executor = TerminalExecutor(self.config)
+            print("✓ Terminal executor created with security policy")
+            return executor
+            
+        except Exception as e:
+            print(f"Warning: Terminal executor failed, falling back to sandbox: {e}")
+            return self._create_sandbox_executor(security_policy)
+    
     def _create_sandbox_executor(self, security_policy) -> Any:
         """Create basic sandbox executor with security policy."""
         executor = SandboxExecutor(self.config)
@@ -204,6 +218,7 @@ class ExecutorFactory:
             "e2b": self._is_e2b_available(),
             "docker": self._is_docker_available(),
             "multi": True,  # Always available
+            "terminal": True,  # Always available
             "sandbox": True  # Always available
         }
     
@@ -237,6 +252,13 @@ class ExecutorFactory:
                 "security_level": "low",
                 "features": ["multi-language", "native execution", "fast"],
                 "requirements": ["Language runtimes"]
+            },
+            "terminal": {
+                "name": "Terminal Executor",
+                "description": "Safe shell command execution with pty integration",
+                "security_level": "medium",
+                "features": ["shell commands", "pty support", "security validation", "interactive commands"],
+                "requirements": ["pty module", "subprocess"]
             },
             "sandbox": {
                 "name": "Basic Sandbox",
