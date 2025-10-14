@@ -21,7 +21,7 @@ class HelpCommand(BaseCommand):
         
         """Show help information."""
         help_text = """
-        Terminal Coding Agent Help
+        POGO Terminal Help
 
         Available Commands:
         • Create a Python function for [description]

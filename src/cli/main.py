@@ -1,5 +1,5 @@
 """
-Interactive CLI interface for the Terminal Coding Agent.
+Interactive CLI interface for POGO Terminal.
 """
 
 from typing import Optional
@@ -171,7 +171,7 @@ def main():
     # Load environment variables from .env file
     load_dotenv()
     
-    parser = argparse.ArgumentParser(description="Terminal Coding Agent")
+    parser = argparse.ArgumentParser(description="POGO Terminal")
     parser.add_argument("--project-root", default=".",
                         help="Project root directory")
     parser.add_argument("--config", help="Configuration file path")

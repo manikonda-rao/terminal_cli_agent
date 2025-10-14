@@ -139,7 +139,7 @@ class InteractiveExecutionPanel:
     def _update_header(self):
         """Update the header panel."""
         header_text = Text()
-        header_text.append("🚀 Interactive Code Execution Panel", style="bold blue")
+        header_text.append("POGO Interactive Code Execution Panel", style="bold #6F00FE")
         header_text.append(" | ")
         header_text.append(f"Language: {self.current_language}", style="cyan")
         header_text.append(" | ")
@@ -153,7 +153,7 @@ class InteractiveExecutionPanel:
             Panel(
                 Align.center(header_text),
                 box=box.ROUNDED,
-                style="blue"
+                style="#6F00FE"
             )
         )
     

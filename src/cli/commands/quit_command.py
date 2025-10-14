@@ -11,7 +11,7 @@ class QuitCommand(BaseCommand):
     @property
     def description(self) -> str:
         """Return the command description."""
-        return "Exit the Terminal Coding Agent"
+        return "Exit the POGO Terminal"
     
     @property
     def aliases(self) -> List[str]:
@@ -30,8 +30,8 @@ class QuitCommand(BaseCommand):
         self.cli.running = False
         
         # Display goodbye message
-        self.console.print("\n[cyan]Terminal Coding Agent session ended.[/cyan]")
-        self.console.print("Thank you for using Terminal Coding Agent!\n")
+        self.console.print("\n[cyan]POGO Terminal session ended.[/cyan]")
+        self.console.print("Thank you for using POGO Terminal!\n")
         
         # Note: The actual termination is handled by the CLI class
         # This command just signals that termination is requested
@@ -39,7 +39,7 @@ class QuitCommand(BaseCommand):
     
     def get_help(self) -> str:
         """Return detailed help text."""
-        return """Exit the Terminal Coding Agent CLI.
+        return """Exit the POGO Terminal CLI.
 
                     Usage: /quit
 

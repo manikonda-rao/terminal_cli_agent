@@ -44,9 +44,9 @@ class UIManager:
         
         # Create header panel
         header_panel = Panel(
-            Align.center(Text(context_text, style="bold cyan")),
+            Align.center(Text(context_text, style="bold #6F00FE")),
             box=box.ROUNDED,
-            style="blue",
+            style="#6F00FE",
             padding=(0, 1)
         )
         
@@ -301,26 +301,28 @@ class UIManager:
     
     def show_welcome_banner(self, version: str = "1.0.0"):
         """Display welcome banner with unique terminal icon."""
-        # Unique ASCII art terminal icon
+        # Unique ASCII art terminal icon with POGO branding and fish face
         terminal_icon = """
     ╔══════════════════════════════════════════════════════════════╗
-    ║  ███████╗██╗   ██╗███████╗████████╗ ██████╗ ██████╗ ██╗     ║
-    ║  ██╔════╝██║   ██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██║     ║
-    ║  ███████╗██║   ██║█████╗     ██║   ██║   ██║██████╔╝██║     ║
-    ║  ╚════██║██║   ██║██╔══╝     ██║   ██║   ██║██╔══██╗██║     ║
-    ║  ███████║╚██████╔╝███████╗   ██║   ╚██████╔╝██║  ██║███████╗║
-    ║  ╚══════╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝║
     ║                                                              ║
-    ║  AI-Powered Terminal Coding Assistant                        ║
-    ║  Generate, modify, and execute code with natural language    ║
-    ║  Safe execution in sandboxed environments                    ║
-    ║  Intelligent file management with version control           ║
-    ║  Persistent conversation context and project state          ║
+    ║    🐠  ██████╗  ██████╗  ██████╗  ██████╗   🐠           ║
+    ║       ██╔══██╗██╔═══██╗██╔═══██╗██╔═══██╗                  ║
+    ║       ██████╔╝██║   ██║██║   ██║██║   ██║                  ║
+    ║       ██╔═══╝ ██║   ██║██║ ██╗██║██║   ██║                  ║
+    ║       ██║     ╚██████╔╝╚██████╔╝╚██████╔╝                  ║
+    ║       ╚═╝      ╚═════╝  ╚═════╝  ╚═════╝                   ║
+    ║                                                              ║
+    ║              AI-Powered Terminal Coding Assistant            ║
+    ║      Generate, modify, and execute code with natural language║
+    ║          Safe execution in sandboxed environments            ║
+    ║        Intelligent file management with version control      ║
+    ║        Persistent conversation context and project state     ║
+    ║                                                              ║
     ╚══════════════════════════════════════════════════════════════╝
         """
         
         welcome_text = f"""
-[bold blue]Terminal Coding Agent v{version}[/bold blue]
+[bold #6F00FE]POGO Terminal v{version}[/bold #6F00FE]
 
 [dim]Enter your development requests in natural language,[/dim]
 [dim]or use /help for commands.[/dim]
@@ -333,13 +335,13 @@ class UIManager:
         """
         
         # Display the ASCII art
-        self.console.print(terminal_icon, style="bold cyan")
+        self.console.print(terminal_icon, style="bold #6F00FE")
         
         # Display welcome text
         welcome_panel = Panel(
             Align.center(welcome_text),
             title="Welcome",
-            border_style="blue",
+            border_style="#6F00FE",
             box=box.DOUBLE
         )
         
