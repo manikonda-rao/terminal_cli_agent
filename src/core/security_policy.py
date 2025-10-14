@@ -49,6 +49,16 @@ class SecurityPatterns(BaseModel):
     custom_patterns: List[str] = Field(default_factory=list)
 
 
+class TerminalSecurityPolicy(BaseModel):
+    """Security policy for terminal command execution."""
+    dangerous_commands: List[str] = Field(default_factory=list)
+    allowed_commands: List[str] = Field(default_factory=list)
+    blocked_patterns: List[str] = Field(default_factory=list)
+    max_command_length: int = Field(default=1000)
+    enable_interactive_mode: bool = Field(default=True)
+    require_command_whitelist: bool = Field(default=False)
+
+
 class SecurityPolicy(BaseModel):
     """Comprehensive security policy configuration."""
     security_level: SecurityLevel = Field(default=SecurityLevel.MODERATE)
@@ -56,10 +66,11 @@ class SecurityPolicy(BaseModel):
     file_system: FileSystemPolicy = Field(default_factory=FileSystemPolicy)
     resource_limits: ResourceLimits = Field(default_factory=ResourceLimits)
     patterns: SecurityPatterns = Field(default_factory=SecurityPatterns)
+    terminal_security: TerminalSecurityPolicy = Field(default_factory=TerminalSecurityPolicy)
     enable_code_analysis: bool = Field(default=True)
     enable_security_scanning: bool = Field(default=True)
     enable_resource_monitoring: bool = Field(default=True)
-    sandbox_mode: str = Field(default="docker")  # docker, e2b, daytona, sandbox
+    sandbox_mode: str = Field(default="docker")  # docker, e2b, daytona, sandbox, terminal
 
 
 class SecurityPolicyManager:
@@ -122,6 +133,40 @@ class SecurityPolicyManager:
                     r'from\s+datetime\s+import',
                     r'from\s+json\s+import',
                 ]
+            ),
+            terminal_security=TerminalSecurityPolicy(
+                dangerous_commands=[
+                    'rm', 'del', 'format', 'fdisk', 'mkfs', 'dd', 'shred',
+                    'sudo', 'su', 'passwd', 'chmod', 'chown', 'mount', 'umount',
+                    'kill', 'killall', 'pkill', 'xkill', 'halt', 'shutdown', 'reboot',
+                    'curl', 'wget', 'nc', 'netcat', 'telnet', 'ssh', 'scp', 'rsync',
+                    'crontab', 'at', 'systemctl', 'service', 'initctl'
+                ],
+                allowed_commands=[
+                    'ls', 'dir', 'pwd', 'cd', 'cat', 'type', 'head', 'tail', 'grep',
+                    'find', 'which', 'where', 'echo', 'print', 'date', 'time', 'whoami',
+                    'git', 'npm', 'pip', 'python', 'node', 'java', 'gcc', 'g++',
+                    'make', 'cmake', 'docker', 'kubectl', 'terraform', 'ansible',
+                    'ps', 'top', 'htop', 'df', 'du', 'free', 'uptime', 'uname',
+                    'mkdir', 'touch', 'cp', 'copy', 'mv', 'move', 'ln', 'link'
+                ],
+                blocked_patterns=[
+                    r'\|\s*rm\s+',
+                    r'\|\s*del\s+',
+                    r'\|\s*sudo\s+',
+                    r'\|\s*su\s+',
+                    r'&&\s*rm\s+',
+                    r'&&\s*del\s+',
+                    r'&&\s*sudo\s+',
+                    r'&&\s*su\s+',
+                    r';\s*rm\s+',
+                    r';\s*del\s+',
+                    r';\s*sudo\s+',
+                    r';\s*su\s+'
+                ],
+                max_command_length=1000,
+                enable_interactive_mode=True,
+                require_command_whitelist=False
             )
         )
     
@@ -198,6 +243,32 @@ class SecurityPolicyManager:
                         r'from\s+itertools\s+import',
                         r'from\s+functools\s+import',
                     ]
+                ),
+                terminal_security=TerminalSecurityPolicy(
+                    dangerous_commands=[
+                        'rm', 'del', 'format', 'fdisk', 'mkfs', 'dd', 'shred',
+                        'sudo', 'su', 'passwd', 'chmod', 'chown', 'mount', 'umount',
+                        'kill', 'killall', 'pkill', 'xkill', 'halt', 'shutdown', 'reboot',
+                        'curl', 'wget', 'nc', 'netcat', 'telnet', 'ssh', 'scp', 'rsync',
+                        'crontab', 'at', 'systemctl', 'service', 'initctl', 'useradd',
+                        'userdel', 'groupadd', 'groupdel', 'visudo', 'chroot'
+                    ],
+                    allowed_commands=[
+                        'ls', 'dir', 'pwd', 'cat', 'type', 'head', 'tail', 'grep',
+                        'find', 'which', 'where', 'echo', 'print', 'date', 'time',
+                        'git', 'npm', 'pip', 'python', 'node', 'java', 'gcc', 'g++',
+                        'make', 'cmake', 'ps', 'top', 'htop', 'df', 'du', 'free',
+                        'uptime', 'uname', 'mkdir', 'touch', 'cp', 'copy', 'mv', 'move'
+                    ],
+                    blocked_patterns=[
+                        r'\|\s*rm\s+', r'\|\s*del\s+', r'\|\s*sudo\s+', r'\|\s*su\s+',
+                        r'&&\s*rm\s+', r'&&\s*del\s+', r'&&\s*sudo\s+', r'&&\s*su\s+',
+                        r';\s*rm\s+', r';\s*del\s+', r';\s*sudo\s+', r';\s*su\s+',
+                        r'\|\s*kill\s+', r'&&\s*kill\s+', r';\s*kill\s+'
+                    ],
+                    max_command_length=500,
+                    enable_interactive_mode=False,
+                    require_command_whitelist=True
                 )
             )
         
@@ -228,6 +299,29 @@ class SecurityPolicyManager:
                         r'eval\s*\(',
                     ],
                     allowed_patterns=[]
+                ),
+                terminal_security=TerminalSecurityPolicy(
+                    dangerous_commands=[
+                        'format', 'fdisk', 'mkfs', 'dd', 'shred', 'halt', 'shutdown', 'reboot'
+                    ],
+                    allowed_commands=[
+                        'ls', 'dir', 'pwd', 'cd', 'cat', 'type', 'head', 'tail', 'grep',
+                        'find', 'which', 'where', 'echo', 'print', 'date', 'time', 'whoami',
+                        'git', 'npm', 'pip', 'python', 'node', 'java', 'gcc', 'g++',
+                        'make', 'cmake', 'docker', 'kubectl', 'terraform', 'ansible',
+                        'ps', 'top', 'htop', 'df', 'du', 'free', 'uptime', 'uname',
+                        'mkdir', 'touch', 'cp', 'copy', 'mv', 'move', 'ln', 'link',
+                        'rm', 'del', 'sudo', 'su', 'chmod', 'chown', 'kill', 'killall',
+                        'curl', 'wget', 'ssh', 'scp', 'rsync', 'crontab', 'at'
+                    ],
+                    blocked_patterns=[
+                        r'\|\s*format\s+', r'\|\s*fdisk\s+', r'\|\s*mkfs\s+',
+                        r'&&\s*format\s+', r'&&\s*fdisk\s+', r'&&\s*mkfs\s+',
+                        r';\s*format\s+', r';\s*fdisk\s+', r';\s*mkfs\s+'
+                    ],
+                    max_command_length=2000,
+                    enable_interactive_mode=True,
+                    require_command_whitelist=False
                 )
             )
         
@@ -352,6 +446,23 @@ class SecurityPolicyManager:
             "enable_security_scanning": policy.enable_security_scanning,
             "enable_resource_monitoring": policy.enable_resource_monitoring
         }
+    
+    def get_terminal_security_policy(self) -> Dict[str, Any]:
+        """Convert security policy to terminal security configuration."""
+        policy = self.policy
+        
+        return {
+            "dangerous_commands": policy.terminal_security.dangerous_commands,
+            "allowed_commands": policy.terminal_security.allowed_commands,
+            "blocked_patterns": policy.terminal_security.blocked_patterns,
+            "max_command_length": policy.terminal_security.max_command_length,
+            "enable_interactive_mode": policy.terminal_security.enable_interactive_mode,
+            "require_command_whitelist": policy.terminal_security.require_command_whitelist,
+            "security_level": policy.security_level.value,
+            "execution_timeout": policy.resource_limits.execution_timeout,
+            "memory_limit_mb": policy.resource_limits.memory_limit_mb,
+            "max_processes": policy.resource_limits.max_processes
+        }
 
 
 def create_security_policy_template() -> str:
@@ -395,6 +506,31 @@ def create_security_policy_template() -> str:
                 "from\\s+json\\s+import"
             ],
             "custom_patterns": []
+        },
+        "terminal_security": {
+            "dangerous_commands": [
+                "rm", "del", "format", "fdisk", "mkfs", "dd", "shred",
+                "sudo", "su", "passwd", "chmod", "chown", "mount", "umount",
+                "kill", "killall", "pkill", "xkill", "halt", "shutdown", "reboot",
+                "curl", "wget", "nc", "netcat", "telnet", "ssh", "scp", "rsync",
+                "crontab", "at", "systemctl", "service", "initctl"
+            ],
+            "allowed_commands": [
+                "ls", "dir", "pwd", "cd", "cat", "type", "head", "tail", "grep",
+                "find", "which", "where", "echo", "print", "date", "time", "whoami",
+                "git", "npm", "pip", "python", "node", "java", "gcc", "g++",
+                "make", "cmake", "docker", "kubectl", "terraform", "ansible",
+                "ps", "top", "htop", "df", "du", "free", "uptime", "uname",
+                "mkdir", "touch", "cp", "copy", "mv", "move", "ln", "link"
+            ],
+            "blocked_patterns": [
+                "\\|\\s*rm\\s+", "\\|\\s*del\\s+", "\\|\\s*sudo\\s+", "\\|\\s*su\\s+",
+                "&&\\s*rm\\s+", "&&\\s*del\\s+", "&&\\s*sudo\\s+", "&&\\s*su\\s+",
+                ";\\s*rm\\s+", ";\\s*del\\s+", ";\\s*sudo\\s+", ";\\s*su\\s+"
+            ],
+            "max_command_length": 1000,
+            "enable_interactive_mode": True,
+            "require_command_whitelist": False
         },
         "enable_code_analysis": True,
         "enable_security_scanning": True,
